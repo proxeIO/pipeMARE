@@ -13,16 +13,16 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 bl_info = {
-  'name': 'Pipe Nightmare',
-  'author': 'Trentin Frederick (proxe)',
-  'version': (0, 0, 3),
-  'blender': (2, 78, 0),
-  'location': '',
-  'description': '',
-  # 'warning': '',
-  # 'wiki_url': '',
-  # 'tracker_url': '',
-  'category': 'Object'
+	'name': 'Pipe Nightmare',
+	'author': 'Trentin Frederick (proxe)',
+	'version': (0, 0, 4),
+	'blender': (2, 78, 0),
+	'location': '',
+	'description': '',
+	# 'warning': '',
+	# 'wiki_url': '',
+	# 'tracker_url': '',
+	'category': 'Object'
 }
 
 import bpy
@@ -33,9 +33,9 @@ from .addon import interface, operator
 
 def register():
 
-  register_module(__name__)
+	register_module(__name__)
 
 
 def unregister():
 
-  unregister_module(__name__)
+	unregister_module(__name__)

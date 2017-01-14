@@ -1,3 +1,15 @@
 defaults = {
-
+	'preview': True,
+	'bounds': False,
+	'pipes': True,
+	'amount': 40,
+	'width': 1.0,
+	'height': 2.0,
+	'length_x': 0.5,
+	'length_y': 0.5,
+	'straight': 0.4,
+	'decoration': 0.3,
+	'rail': 0.4,
+	'split': 0.3,
+	'bevel': 0.35,
 }
