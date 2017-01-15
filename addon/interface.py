@@ -2,18 +2,21 @@ def draw(operator, context):
 
 	layout = operator.layout
 
-	align = True
-
-	column = layout.column(align=align)
+	column = layout.column(align=True)
 
 	column.label(text='General:')
 	column.prop(operator, 'amount', text='Max Pipes')
 	column.prop(operator, 'width', text='Region Width')
 	column.prop(operator, 'height', text='Region Height')
+	column.prop(operator, 'depth', text='Region Depth')
 
-	column.label(text='Pipe Length:')
+	column.label(text='Length:')
 	column.prop(operator, 'length_x')
 	column.prop(operator, 'length_y')
+
+	column.label(text='Thickness:')
+	column.prop(operator, 'min')
+	column.prop(operator, 'max')
 
 	column.label(text='Details:')
 	column.prop(operator, 'straight')
@@ -21,6 +24,9 @@ def draw(operator, context):
 	column.prop(operator, 'rail')
 	column.prop(operator, 'split')
 	column.prop(operator, 'bevel')
+
+	column.label(text='Resolution:')
+	column.prop(operator, 'amount', text='Surface')
 
 	column.separator()
 
@@ -31,4 +37,20 @@ def draw(operator, context):
 		row = column.row()
 		row.prop(operator, 'bounds')
 		row.prop(operator, 'pipes')
+
+
+		if operator.pipes:
+
+			row = column.row()
+			row.prop(operator, 'decorations')
+			row.prop(operator, 'rails')
+
+
+def menu_entry(menu, context):
+
+	layout = menu.layout
+
+	layout.separator()
+
+	layout.operator('object.pipe_nightmare', text='Pipes', icon='IPO')
 

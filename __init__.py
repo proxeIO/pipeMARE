@@ -15,10 +15,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 bl_info = {
 	'name': 'Pipe Nightmare',
 	'author': 'Trentin Frederick (proxe)',
-	'version': (0, 0, 5),
+	'version': (0, 0, 6),
 	'blender': (2, 78, 0),
-	'location': '',
-	'description': '',
+	'location': 'View 3D \N{Rightwards Arrow} Add \N{Rightwards Arrow} Curve \N{Rightwards Arrow} Pipes',
+	'description': 'Create random pipes.',
 	# 'warning': '',
 	# 'wiki_url': '',
 	# 'tracker_url': '',
@@ -33,9 +33,13 @@ from .addon import interface, operator
 
 def register():
 
+	bpy.types.INFO_MT_curve_add.append(interface.menu_entry)
+
 	register_module(__name__)
 
 
 def unregister():
+
+	bpy.types.INFO_MT_curve_add.remove(interface.menu_entry)
 
 	unregister_module(__name__)

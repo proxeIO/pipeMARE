@@ -5,7 +5,7 @@ import random
 class generate:
 
 
-	def __init__(self, operator):
+	def __init__(self, operator, context):
 
 		pass
 

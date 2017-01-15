@@ -12,29 +12,8 @@ class pipe_nightmare(Operator):
 	bl_idname = 'object.pipe_nightmare'
 	bl_label = 'Add Pipes'
 	bl_description = 'Generate random pipes.'
-	bl_options = {'PRESET'}
+	bl_options = {'PRESET', 'REGISTER', 'UNDO'}
 
-
-	preview = BoolProperty(
-		name = 'Preview',
-		description = 'Preview changes in the 3D View',
-		update = update,
-		default = default['preview']
-	)
-
-	bounds = BoolProperty(
-		name = 'Bounds',
-		description = 'Display the bounds of the generated pipes in the 3D View',
-		update = update,
-		default = default['bounds']
-	)
-
-	pipes = BoolProperty(
-		name = 'Pipes',
-		description = 'Display the generated pipes in the 3D View',
-		update = update,
-		default = default['pipes']
-	)
 
 	amount = IntProperty(
 		name = 'Amount',
@@ -65,6 +44,16 @@ class pipe_nightmare(Operator):
 		default = default['height']
 	)
 
+	depth = FloatProperty(
+		name = 'Depth',
+		description = 'Depth of the area that the pipes occupy',
+		subtype = 'DISTANCE',
+		min = 0,
+		soft_max = 10,
+		update = update,
+		default = default['depth']
+	)
+
 	length_x = FloatProperty(
 		name = 'X',
 		description = 'Maximum length of horizantal pipes.',
@@ -85,8 +74,28 @@ class pipe_nightmare(Operator):
 		default = default['length_y']
 	)
 
+	min = FloatProperty(
+		name = 'Minimum',
+		description = 'The minimum thickness of the pipes.',
+		subtype = 'DISTANCE',
+		min = 0.0,
+		max = 5.0,
+		update = update,
+		default = default['min']
+	)
+
+	max = FloatProperty(
+		name = 'Maximum',
+		description = 'The maximum thickness of the pipes.',
+		subtype = 'DISTANCE',
+		min = 0.0,
+		max = 5.0,
+		update = update,
+		default = default['max']
+	)
+
 	straight = IntProperty(
-		name = 'Straightness',
+		name = 'Straight Pipes',
 		description = 'The amount of pipes that are straight',
 		subtype = 'PERCENTAGE',
 		min = 0,
@@ -135,6 +144,41 @@ class pipe_nightmare(Operator):
 		default = default['bevel']
 	)
 
+	preview = BoolProperty(
+		name = 'Preview',
+		description = 'Preview changes in the 3D View',
+		update = update,
+		default = default['preview']
+	)
+
+	bounds = BoolProperty(
+		name = 'Bounds',
+		description = 'Display the bounds of the generated pipes in the 3D View',
+		update = update,
+		default = default['bounds']
+	)
+
+	pipes = BoolProperty(
+		name = 'Pipes',
+		description = 'Display the generated pipes in the 3D View',
+		update = update,
+		default = default['pipes']
+	)
+
+	decorations = BoolProperty(
+		name = 'Decorations',
+		description = 'Display the generated pipe decorations in the 3D View',
+		update = update,
+		default = default['decorations']
+	)
+
+	rails = BoolProperty(
+		name = 'Rails',
+		description = 'Display the generated pipe rails in the 3D View',
+		update = update,
+		default = default['rails']
+	)
+
 
 	def check(self, context):
 
@@ -148,14 +192,12 @@ class pipe_nightmare(Operator):
 
 	def execute(self, context):
 
-		generate(self)
+		generate(self, context)
 
 		return {'FINISHED'}
 
 
 	def invoke(self, context, event):
-
-		self.check(context)
 
 		if event.type == 'ESC':
 
