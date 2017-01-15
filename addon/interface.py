@@ -26,24 +26,8 @@ def draw(operator, context):
 	column.prop(operator, 'bevel')
 
 	column.label(text='Resolution:')
-	column.prop(operator, 'amount', text='Surface')
+	column.prop(operator, 'surface')
 
-	column.separator()
-
-	column.prop(operator, 'preview')
-
-	if operator.preview:
-
-		row = column.row()
-		row.prop(operator, 'bounds')
-		row.prop(operator, 'pipes')
-
-
-		if operator.pipes:
-
-			row = column.row()
-			row.prop(operator, 'decorations')
-			row.prop(operator, 'rails')
 
 
 def menu_entry(menu, context):

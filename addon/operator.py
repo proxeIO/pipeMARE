@@ -5,7 +5,7 @@ from bpy.props import BoolProperty, IntProperty, FloatVectorProperty, FloatPrope
 
 from . import interface
 from .config import defaults as default
-from .utils import generate, update, exit
+from .utils import generate
 
 
 class pipe_nightmare(Operator):
@@ -20,7 +20,6 @@ class pipe_nightmare(Operator):
 		description = 'Maximum number of pipes',
 		min = 0,
 		max = 1000,
-		update = update,
 		default = default['amount']
 	)
 
@@ -30,7 +29,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update,
 		default = default['width']
 	)
 
@@ -40,7 +38,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update,
 		default = default['height']
 	)
 
@@ -50,7 +47,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update,
 		default = default['depth']
 	)
 
@@ -60,7 +56,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update,
 		default = default['length_x']
 	)
 
@@ -70,7 +65,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update,
 		default = default['length_y']
 	)
 
@@ -80,7 +74,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0.0,
 		max = 5.0,
-		update = update,
 		default = default['min']
 	)
 
@@ -90,7 +83,6 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0.0,
 		max = 5.0,
-		update = update,
 		default = default['max']
 	)
 
@@ -100,7 +92,6 @@ class pipe_nightmare(Operator):
 		subtype = 'PERCENTAGE',
 		min = 0,
 		max = 100,
-		update = update,
 		default = default['straight']
 	)
 
@@ -110,7 +101,6 @@ class pipe_nightmare(Operator):
 		subtype = 'PERCENTAGE',
 		min = 0,
 		max = 100,
-		update = update,
 		default = default['decoration']
 	)
 
@@ -120,7 +110,6 @@ class pipe_nightmare(Operator):
 		subtype = 'PERCENTAGE',
 		min = 0,
 		max = 100,
-		update = update,
 		default = default['rail']
 	)
 
@@ -130,7 +119,6 @@ class pipe_nightmare(Operator):
 		subtype = 'PERCENTAGE',
 		min = 0,
 		max = 100,
-		update = update,
 		default = default['split']
 	)
 
@@ -140,49 +128,16 @@ class pipe_nightmare(Operator):
 		subtype = 'PERCENTAGE',
 		min = 0,
 		max = 100,
-		update = update,
 		default = default['bevel']
 	)
 
-	preview = BoolProperty(
-		name = 'Preview',
-		description = 'Preview changes in the 3D View',
-		update = update,
-		default = default['preview']
+	surface = IntProperty(
+		name = 'Surface',
+		description = 'The surface resolution of the pipes.',
+		min = 0,
+		max = 32,
+		default = default['surface']
 	)
-
-	bounds = BoolProperty(
-		name = 'Bounds',
-		description = 'Display the bounds of the generated pipes in the 3D View',
-		update = update,
-		default = default['bounds']
-	)
-
-	pipes = BoolProperty(
-		name = 'Pipes',
-		description = 'Display the generated pipes in the 3D View',
-		update = update,
-		default = default['pipes']
-	)
-
-	decorations = BoolProperty(
-		name = 'Decorations',
-		description = 'Display the generated pipe decorations in the 3D View',
-		update = update,
-		default = default['decorations']
-	)
-
-	rails = BoolProperty(
-		name = 'Rails',
-		description = 'Display the generated pipe rails in the 3D View',
-		update = update,
-		default = default['rails']
-	)
-
-
-	def check(self, context):
-
-		return True
 
 
 	def draw(self, context):
@@ -198,11 +153,5 @@ class pipe_nightmare(Operator):
 
 
 	def invoke(self, context, event):
-
-		if event.type == 'ESC':
-
-			exit()
-
-			return {'CANCELLED'}
 
 		return context.window_manager.invoke_props_dialog(self, width=250)

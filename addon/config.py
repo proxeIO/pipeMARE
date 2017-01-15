@@ -12,9 +12,5 @@ defaults = {
 	'rail': 40,
 	'split': 30,
 	'bevel': 35,
-	'preview': False,
-	'bounds': True,
-	'pipes': False,
-	'decorations': False,
-	'rails': False,
+	'surface': 1
 }
