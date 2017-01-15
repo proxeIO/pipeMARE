@@ -5,12 +5,12 @@ from bpy.props import BoolProperty, IntProperty, FloatVectorProperty, FloatPrope
 
 from . import interface
 from .config import defaults as default
-from .utils import update
+from .utils import generate, update, exit
 
 
 class pipe_nightmare(Operator):
 	bl_idname = 'object.pipe_nightmare'
-	bl_label = 'Pipe Nightmare'
+	bl_label = 'Add Pipes'
 	bl_description = 'Generate random pipes.'
 	bl_options = {'PRESET'}
 
@@ -18,108 +18,120 @@ class pipe_nightmare(Operator):
 	preview = BoolProperty(
 		name = 'Preview',
 		description = 'Preview changes in the 3D View',
-		update = update(self, context),
+		update = update,
 		default = default['preview']
 	)
 
 	bounds = BoolProperty(
 		name = 'Bounds',
 		description = 'Display the bounds of the generated pipes in the 3D View',
-		update = update(self, context),
+		update = update,
 		default = default['bounds']
 	)
 
 	pipes = BoolProperty(
 		name = 'Pipes',
 		description = 'Display the generated pipes in the 3D View',
-		update = update(self, context),
+		update = update,
 		default = default['pipes']
 	)
 
 	amount = IntProperty(
 		name = 'Amount',
 		description = 'Maximum number of pipes',
-		update = update(self, context),
+		min = 0,
+		max = 1000,
+		update = update,
 		default = default['amount']
 	)
 
-	width = FloatVectorProperty(
+	width = FloatProperty(
 		name = 'Width',
 		description = 'Width of the area that the pipes occupy.',
-		subtype = 'TRANSLATION',
+		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update(self, context),
+		update = update,
 		default = default['width']
 	)
 
-	height = FloatVectorProperty(
+	height = FloatProperty(
 		name = 'Height',
 		description = 'Height of the area that the pipes occupy',
-		subtype = 'TRANSLATION',
+		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update(self, context),
+		update = update,
 		default = default['height']
 	)
 
-	length_x = FloatVectorProperty(
+	length_x = FloatProperty(
 		name = 'X',
 		description = 'Maximum length of horizantal pipes.',
-		subtype = 'TRANSLATION',
+		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update(self, context),
+		update = update,
 		default = default['length_x']
 	)
 
-	length_y = FloatVectorProperty(
+	length_y = FloatProperty(
 		name = 'Y',
 		description = 'Maximum length of vertical pipes.',
-		subtype = 'TRANSLATION',
+		subtype = 'DISTANCE',
 		min = 0,
 		soft_max = 10,
-		update = update(self, context),
+		update = update,
 		default = default['length_y']
 	)
 
-	straight = FloatProperty(
+	straight = IntProperty(
 		name = 'Straightness',
 		description = 'The amount of pipes that are straight',
 		subtype = 'PERCENTAGE',
-		update = update(self, context),
+		min = 0,
+		max = 100,
+		update = update,
 		default = default['straight']
 	)
 
-	decoration = FloatProperty(
+	decoration = IntProperty(
 		name = 'Decorations',
 		description = 'Amount of pipes that have additional decorations located along them.',
 		subtype = 'PERCENTAGE',
-		update = update(self, context),
+		min = 0,
+		max = 100,
+		update = update,
 		default = default['decoration']
 	)
 
-	rail = FloatProperty(
+	rail = IntProperty(
 		name = 'Rails',
 		description = 'Amount of pipes that will have additional rails alongside them.',
 		subtype = 'PERCENTAGE',
-		update = update(self, context),
+		min = 0,
+		max = 100,
+		update = update,
 		default = default['rail']
 	)
 
-	split = FloatProperty(
+	split = IntProperty(
 		name = 'Split',
 		description = 'Amount of pipes that should be split up into smaller pipes that occupy the same path.',
 		subtype = 'PERCENTAGE',
-		update = update(self, context),
+		min = 0,
+		max = 100,
+		update = update,
 		default = default['split']
 	)
 
-	bevel = FloatProperty(
+	bevel = IntProperty(
 		name = 'Bevel',
 		description = 'Amount of pipes that should have rounded corners.',
 		subtype = 'PERCENTAGE',
-		update = update(self, context),
+		min = 0,
+		max = 100,
+		update = update,
 		default = default['bevel']
 	)
 
@@ -136,9 +148,19 @@ class pipe_nightmare(Operator):
 
 	def execute(self, context):
 
+		generate(self)
+
 		return {'FINISHED'}
 
 
 	def invoke(self, context, event):
 
-		context.window_manager.invoke_props_dialog(self, width=250)
+		self.check(context)
+
+		if event.type == 'ESC':
+
+			exit()
+
+			return {'CANCELLED'}
+
+		return context.window_manager.invoke_props_dialog(self, width=250)
