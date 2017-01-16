@@ -1,8 +1,10 @@
-def draw(operator, context):
+def operator(operator, context):
 
 	layout = operator.layout
 
 	column = layout.column(align=True)
+
+	column.operator('object.pipe_nightmare_update')
 
 	column.label(text='General:')
 	column.prop(operator, 'amount', text='Max Pipes')
@@ -28,6 +30,7 @@ def draw(operator, context):
 	column.label(text='Resolution:')
 	column.prop(operator, 'surface')
 
+	column.prop(operator, 'convert')
 
 
 def menu_entry(menu, context):

@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import Operator
-from bpy.props import BoolProperty, IntProperty, FloatVectorProperty, FloatProperty
+from bpy.props import BoolProperty, IntProperty, FloatProperty
 
 from . import interface
 from .config import defaults as default
@@ -139,10 +139,16 @@ class pipe_nightmare(Operator):
 		default = default['surface']
 	)
 
+	convert = BoolProperty(
+		name = 'Convert to Mesh',
+		description = 'Convert the generated pipes into a single mesh object',
+		default = default['convert']
+	)
+
 
 	def draw(self, context):
 
-		interface.draw(self, context)
+		interface.operator(self, context)
 
 
 	def execute(self, context):
@@ -155,3 +161,17 @@ class pipe_nightmare(Operator):
 	def invoke(self, context, event):
 
 		return context.window_manager.invoke_props_dialog(self, width=250)
+
+
+class update(Operator):
+	bl_idname = 'object.pipe_nightmare_update'
+	bl_label = 'Update'
+	bl_description = 'Update the 3D View and display the generated pipes.'
+	bl_options = {'INTERNAL'}
+
+
+	def execute(self, context):
+
+		generate(self, context)
+
+		return {'FINISHED'}

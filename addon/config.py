@@ -12,5 +12,6 @@ defaults = {
 	'rail': 40,
 	'split': 30,
 	'bevel': 35,
-	'surface': 1
+	'surface': 1,
+	'convert': False,
 }
