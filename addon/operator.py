@@ -74,6 +74,7 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0.0,
 		max = 5.0,
+		precision = 3,
 		default = default['min']
 	)
 
@@ -83,6 +84,7 @@ class pipe_nightmare(Operator):
 		subtype = 'DISTANCE',
 		min = 0.0,
 		max = 5.0,
+		precision = 3,
 		default = default['max']
 	)
 
@@ -139,35 +141,39 @@ class pipe_nightmare(Operator):
 		default = default['surface']
 	)
 
+	seed = IntProperty(
+		name = 'Seed',
+		description = 'The seed random basis for generating pipes.',
+		default = default['seed']
+	)
+
 	convert = BoolProperty(
 		name = 'Convert to Mesh',
-		description = 'Convert the generated pipes into a single mesh object',
+		description = 'Convert the generated pipes into a single mesh object.',
 		default = default['convert']
 	)
+
+	create_empty = BoolProperty(
+		name = 'Create Empty',
+		description = 'Create an empty as the parent for all the pipes. (Slower but allows for easier control)',
+		default = default['create_empty']
+	)
+
+	hide_lines = BoolProperty(
+		name = 'Hide Relationship Lines',
+		description = 'Hide parent relationship lines in the 3D view.',
+		default = default['hide_lines']
+	)
+
+
+	def check(self, context):
+
+		return True
 
 
 	def draw(self, context):
 
 		interface.operator(self, context)
-
-
-	def execute(self, context):
-
-		generate(self, context)
-
-		return {'FINISHED'}
-
-
-	def invoke(self, context, event):
-
-		return context.window_manager.invoke_props_dialog(self, width=250)
-
-
-class update(Operator):
-	bl_idname = 'object.pipe_nightmare_update'
-	bl_label = 'Update'
-	bl_description = 'Update the 3D View and display the generated pipes.'
-	bl_options = {'INTERNAL'}
 
 
 	def execute(self, context):

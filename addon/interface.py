@@ -4,8 +4,6 @@ def operator(operator, context):
 
 	column = layout.column(align=True)
 
-	column.operator('object.pipe_nightmare_update')
-
 	column.label(text='General:')
 	column.prop(operator, 'amount', text='Max Pipes')
 	column.prop(operator, 'width', text='Region Width')
@@ -30,7 +28,16 @@ def operator(operator, context):
 	column.label(text='Resolution:')
 	column.prop(operator, 'surface')
 
+	column.label(text='Misc:')
+	column.prop(operator, 'seed')
+
 	column.prop(operator, 'convert')
+
+	row = column.row()
+	column = row.column()
+	column.active = False if operator.convert else True
+	column.prop(operator, 'create_empty')
+	column.prop(operator, 'hide_lines')
 
 
 def menu_entry(menu, context):
