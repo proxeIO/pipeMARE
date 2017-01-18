@@ -16,37 +16,37 @@ class pipe_nightmare(Operator):
 
 
 	amount = IntProperty(
-		name = 'Amount',
-		description = 'Maximum number of pipes',
+		name = 'Pipes',
+		description = 'Number of pipes',
 		min = 0,
 		max = 1000,
 		default = default['amount']
 	)
 
 	width = FloatProperty(
-		name = 'Width',
+		name = 'Region Width',
 		description = 'Width of the area that the pipes occupy.',
 		subtype = 'DISTANCE',
-		min = 0,
-		soft_max = 10,
+		min = 0.01,
+		soft_max = 10.0,
 		default = default['width']
 	)
 
 	height = FloatProperty(
-		name = 'Height',
+		name = 'Region Height',
 		description = 'Height of the area that the pipes occupy',
 		subtype = 'DISTANCE',
-		min = 0,
-		soft_max = 10,
+		min = 0.01,
+		soft_max = 10.0,
 		default = default['height']
 	)
 
 	depth = FloatProperty(
-		name = 'Depth',
+		name = 'Region Depth',
 		description = 'Depth of the area that the pipes occupy',
 		subtype = 'DISTANCE',
-		min = 0,
-		soft_max = 10,
+		min = 0.01,
+		soft_max = 10.0,
 		default = default['depth']
 	)
 
@@ -54,8 +54,8 @@ class pipe_nightmare(Operator):
 		name = 'X',
 		description = 'Maximum length of horizantal pipes.',
 		subtype = 'DISTANCE',
-		min = 0,
-		soft_max = 10,
+		min = 0.001,
+		soft_max = 10.0,
 		default = default['length_x']
 	)
 
@@ -63,8 +63,8 @@ class pipe_nightmare(Operator):
 		name = 'Y',
 		description = 'Maximum length of vertical pipes.',
 		subtype = 'DISTANCE',
-		min = 0,
-		soft_max = 10,
+		min = 0.001,
+		soft_max = 10.0,
 		default = default['length_y']
 	)
 
@@ -72,7 +72,7 @@ class pipe_nightmare(Operator):
 		name = 'Minimum',
 		description = 'The minimum thickness of the pipes.',
 		subtype = 'DISTANCE',
-		min = 0.0,
+		min = 0.001,
 		max = 5.0,
 		precision = 3,
 		default = default['min']
@@ -82,7 +82,7 @@ class pipe_nightmare(Operator):
 		name = 'Maximum',
 		description = 'The maximum thickness of the pipes.',
 		subtype = 'DISTANCE',
-		min = 0.0,
+		min = 0.001,
 		max = 5.0,
 		precision = 3,
 		default = default['max']
@@ -159,11 +159,10 @@ class pipe_nightmare(Operator):
 		default = default['create_empty']
 	)
 
-	hide_lines = BoolProperty(
-		name = 'Hide Relationship Lines',
-		description = 'Hide parent relationship lines in the 3D view.',
-		default = default['hide_lines']
-	)
+	@classmethod
+	def poll(operator, context):
+
+		return context.mode == 'OBJECT'
 
 
 	def check(self, context):

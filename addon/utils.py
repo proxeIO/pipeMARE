@@ -13,21 +13,15 @@ class generate:
 
 		seed(operator.seed)
 
-		if operator.create_empty and operator.hide_lines and not operator.convert:
-
-			context.space_data.show_relationship_lines = False if operator.hide_lines else True
-
 		self.pipes(operator, context)
 
 
 	@staticmethod
-	def pipe_location(pipe, width, depth, thickness):
+	def pipe_depth(pipe, depth):
 
-		width = width * 0.5
 		depth = depth * 0.5
 
-		pipe.location.x = random_float(-width+thickness, width-thickness)
-		pipe.location.y = random_float(-depth+thickness, depth-thickness)
+		pipe.location.y = random_float(-depth, depth)
 
 
 	def pipes(self, operator, context):
@@ -68,21 +62,90 @@ class generate:
 
 			if is_straight_pipe:
 
-				self.straight_pipe(operator, pipe_object, spline)
+				self.pipe_depth(pipe_object, operator.depth)
+
+				self.straight_pipe(spline, operator.height, operator.width)
 
 			else:
 
-				pass
+				self.pipe_depth(pipe_object, operator.depth)
+
+				self.bent_pipe(operator, context, pipe_object, spline)
 
 
+	def straight_pipe(self, spline, height, width):
 
-	def straight_pipe(self, operator, pipe, spline):
+		width = width * 0.5
+
+		base = spline.points[-1]
+		base.co.x = random_float(-width, width)
 
 		spline.points.add(count=1)
 
-		spline.points[1].co.y = operator.height
+		spline.points[-1].co.x = base.co.x
+		spline.points[-1].co.y = height
 
-		self.pipe_location(pipe, operator.width, operator.depth, pipe.data.bevel_depth)
+
+	def bent_pipe(self, operator, context, pipe, spline):
+
+		width = operator.width * 0.5
+
+		base = spline.points[-1]
+		base.co.x = random_float(-width, width)
+
+		last_y = 0.0
+		last_x = base.co.x
+
+		while last_y < operator.height:
+
+			spline.points.add(count=1)
+
+			point = spline.points[-1]
+
+			point.co.x = last_x
+
+			point.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
+
+			last_y = point.co.y
+
+			spline.points.add(count=1)
+
+			point = spline.points[-1]
+
+			point.co.x = last_x + random_float(-operator.length_x, operator.length_y)
+			point.co.y = last_y
+
+			if point.co.x > operator.width * 0.5:
+
+				point.co.x -= point.co.x - operator.width * 0.5
+
+			if point.co.x < -operator.width * 0.5:
+
+				point.co.x -= point.co.x + operator.width * 0.5
+
+			last_x = point.co.x
+
+		else:
+
+			spline.points[-1].co.y = operator.height
+			spline.points[-1].co.x = last_x
+
+			if spline.points[-2].co.y > operator.height:
+
+				spline.points[-1].select = True
+				spline.points[-2].co.y = operator.height
+
+				try: old_active_object = bpy.data.objects[context.active_object.name]
+				except: pass
+
+				context.scene.objects.active = pipe
+
+				bpy.ops.object.mode_set(mode='EDIT')
+				bpy.ops.curve.delete(type='VERT')
+				bpy.ops.object.mode_set(mode='OBJECT')
+
+				try: context.scene.objects.active = old_active_object
+				except: pass
 
 
 	def decorations(self, operator, context):

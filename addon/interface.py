@@ -5,10 +5,10 @@ def operator(operator, context):
 	column = layout.column(align=True)
 
 	column.label(text='General:')
-	column.prop(operator, 'amount', text='Max Pipes')
-	column.prop(operator, 'width', text='Region Width')
-	column.prop(operator, 'height', text='Region Height')
-	column.prop(operator, 'depth', text='Region Depth')
+	column.prop(operator, 'amount')
+	column.prop(operator, 'width')
+	column.prop(operator, 'height')
+	column.prop(operator, 'depth')
 
 	column.label(text='Length:')
 	column.prop(operator, 'length_x')
@@ -20,10 +20,10 @@ def operator(operator, context):
 
 	column.label(text='Details:')
 	column.prop(operator, 'straight')
-	column.prop(operator, 'decoration')
-	column.prop(operator, 'rail')
-	column.prop(operator, 'split')
-	column.prop(operator, 'bevel')
+	# column.prop(operator, 'decoration')
+	# column.prop(operator, 'rail')
+	# column.prop(operator, 'split')
+	# column.prop(operator, 'bevel')
 
 	column.label(text='Resolution:')
 	column.prop(operator, 'surface')
@@ -31,20 +31,28 @@ def operator(operator, context):
 	column.label(text='Misc:')
 	column.prop(operator, 'seed')
 
-	column.prop(operator, 'convert')
+	# column.prop(operator, 'convert')
 
 	row = column.row()
 	column = row.column()
 	column.active = False if operator.convert else True
 	column.prop(operator, 'create_empty')
-	column.prop(operator, 'hide_lines')
+
+	for area in context.screen.areas:
+		if area.type == 'VIEW_3D':
+			for space in area.spaces:
+				if space.type == 'VIEW_3D':
+					space_data = space
+
+	column.prop(space_data, 'show_relationship_lines')
 
 
 def menu_entry(menu, context):
 
-	layout = menu.layout
+	if context.mode == 'OBJECT':
 
-	layout.separator()
+		layout = menu.layout
 
-	layout.operator('object.pipe_nightmare', text='Pipes', icon='IPO')
+		layout.separator()
 
+		layout.operator('object.pipe_nightmare', text='Pipes', icon='IPO')
