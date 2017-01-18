@@ -51,7 +51,7 @@ class generate:
 				pipe_object.select = False
 
 			pipe_data.fill_mode = 'NONE'
-			pipe_data.bevel_depth = random_float(operator.min, operator.max)
+			pipe_data.bevel_depth = random_float(operator.min*0.5, operator.max*0.5)
 			pipe_data.bevel_resolution = operator.surface
 
 			pipe_object.rotation_euler.x = pi*0.5
