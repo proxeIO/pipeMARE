@@ -9,150 +9,162 @@ from random import uniform as random_float
 class generate:
 
 
-	def __init__(self, operator, context):
-
-		seed(operator.seed)
-
-		self.pipes(operator, context)
+	class pipe:
 
 
-	@staticmethod
-	def pipe_depth(pipe, depth):
-
-		depth = depth * 0.5
-
-		pipe.location.y = random_float(-depth, depth)
+		class bent:
 
 
-	def pipes(self, operator, context):
+			def __init__(self, operator, context, pipe, spline):
 
-		empty = None if not operator.create_empty and operator.convert else bpy.data.objects.new(name='Pipes', object_data=None)
+				width = operator.width * 0.5
 
-		if operator.create_empty and not operator.convert:
+				base = spline.points[-1]
+				base.co.x = random_float(-width, width)
 
-			context.scene.objects.link(empty)
-			context.scene.objects.active = empty
-			empty.empty_draw_type = 'CUBE'
-			empty.location.z = operator.height*0.5
-			empty.scale = Vector((operator.width*0.5, operator.depth*0.5, operator.height*0.5))
+				last_y = 0.0
+				last_x = base.co.x
 
-		for index in range(operator.amount):
+				while last_y < operator.height:
 
-			name = 'Pipe.{}'.format(str(index+1).zfill(len(str(operator.amount))))
+					spline.points.add(count=2)
 
-			pipe_data = bpy.data.curves.new(name=name, type='CURVE')
-			pipe_object = bpy.data.objects.new(name=name, object_data=pipe_data)
-			context.scene.objects.link(pipe_object)
+					point1 = spline.points[-2]
+					point2 = spline.points[-1]
 
-			if operator.create_empty and not operator.convert:
+					point1.co.x = last_x
+					point1.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
 
-				pipe_object.select = True
-				bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-				pipe_object.select = False
+					last_y = point1.co.y
 
-			pipe_data.fill_mode = 'NONE'
-			pipe_data.bevel_depth = random_float(operator.min*0.5, operator.max*0.5)
-			pipe_data.bevel_resolution = operator.surface
+					point2.co.x = last_x + random_float(-operator.length_x, operator.length_y)
+					point2.co.y = last_y
 
-			pipe_object.rotation_euler.x = pi*0.5
+					if point2.co.x > operator.width * 0.5:
 
-			spline = pipe_data.splines.new('POLY')
+						point2.co.x -= point2.co.x - operator.width * 0.5
+
+					if point2.co.x < -operator.width * 0.5:
+
+						point2.co.x -= point2.co.x + operator.width * 0.5
+
+					last_x = point2.co.x
+
+				else:
+
+					spline.points[-1].co.y = operator.height
+					spline.points[-1].co.x = last_x
+
+					if spline.points[-2].co.y > operator.height:
+
+						spline.points[-1].select = True
+						spline.points[-2].co.y = operator.height
+
+
+						old_active_object = bpy.data.objects[context.active_object.name] if context.active_object else None
+
+						context.scene.objects.active = pipe
+
+						bpy.ops.object.mode_set(mode='EDIT')
+						bpy.ops.curve.delete(type='VERT')
+						bpy.ops.object.mode_set(mode='OBJECT')
+
+						if old_active_object:
+
+							context.scene.objects.active = old_active_object
+
+
+		def __init__(self, operator, context, pipe):
+
+			spline = pipe.data.splines.new('POLY')
 
 			is_straight_pipe = random_integer(1, 100) < operator.straight
 
 			if is_straight_pipe:
 
-				self.pipe_depth(pipe_object, operator.depth)
+				self.depth(pipe, operator.depth)
 
-				self.straight_pipe(spline, operator.height, operator.width)
+				self.straight(spline, operator.height, operator.width)
 
 			else:
 
-				self.pipe_depth(pipe_object, operator.depth)
+				self.depth(pipe, operator.depth)
 
-				self.bent_pipe(operator, context, pipe_object, spline)
-
-
-	def straight_pipe(self, spline, height, width):
-
-		width = width * 0.5
-
-		base = spline.points[-1]
-		base.co.x = random_float(-width, width)
-
-		spline.points.add(count=1)
-
-		spline.points[-1].co.x = base.co.x
-		spline.points[-1].co.y = height
+				self.bent(operator, context, pipe, spline)
 
 
-	def bent_pipe(self, operator, context, pipe, spline):
+		@staticmethod
+		def depth(pipe, depth):
 
-		width = operator.width * 0.5
+			depth = depth * 0.5
 
-		base = spline.points[-1]
-		base.co.x = random_float(-width, width)
+			pipe.location.y = random_float(-depth, depth)
 
-		last_y = 0.0
-		last_x = base.co.x
 
-		while last_y < operator.height:
+		@staticmethod
+		def straight(spline, height, width):
+
+			width = width * 0.5
+
+			base = spline.points[-1]
+			base.co.x = random_float(-width, width)
 
 			spline.points.add(count=1)
 
-			point = spline.points[-1]
-
-			point.co.x = last_x
-
-			point.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
-
-			last_y = point.co.y
-
-			spline.points.add(count=1)
-
-			point = spline.points[-1]
-
-			point.co.x = last_x + random_float(-operator.length_x, operator.length_y)
-			point.co.y = last_y
-
-			if point.co.x > operator.width * 0.5:
-
-				point.co.x -= point.co.x - operator.width * 0.5
-
-			if point.co.x < -operator.width * 0.5:
-
-				point.co.x -= point.co.x + operator.width * 0.5
-
-			last_x = point.co.x
-
-		else:
-
-			spline.points[-1].co.y = operator.height
-			spline.points[-1].co.x = last_x
-
-			if spline.points[-2].co.y > operator.height:
-
-				spline.points[-1].select = True
-				spline.points[-2].co.y = operator.height
-
-				try: old_active_object = bpy.data.objects[context.active_object.name]
-				except: pass
-
-				context.scene.objects.active = pipe
-
-				bpy.ops.object.mode_set(mode='EDIT')
-				bpy.ops.curve.delete(type='VERT')
-				bpy.ops.object.mode_set(mode='OBJECT')
-
-				try: context.scene.objects.active = old_active_object
-				except: pass
+			spline.points[-1].co.x = base.co.x
+			spline.points[-1].co.y = height
 
 
-	def decorations(self, operator, context):
+	def __init__(self, operator, context):
 
-		pass
+		seed(operator.seed)
+
+		if operator.create_empty and not operator.convert:
+
+			create.empty(operator, context)
+
+		for index in range(operator.amount):
+
+			pipe = create.pipe(operator, context, index)
+
+			self.pipe(operator, context, pipe)
 
 
-	def rails(self, operator, context):
+class create:
 
-		pass
+
+	@staticmethod
+	def empty(operator, context):
+
+		empty = bpy.data.objects.new(name='Pipes', object_data=None)
+
+		context.scene.objects.link(empty)
+		context.scene.objects.active = empty
+
+		empty.empty_draw_type = 'CUBE'
+		empty.location.z = operator.height * 0.5
+		empty.scale = Vector((operator.width*0.5, operator.depth*0.5, operator.height*0.5))
+
+
+	@staticmethod
+	def pipe(operator, context, index):
+
+		name = 'Pipe.{}'.format(str(index+1).zfill(len(str(operator.amount))))
+
+		data = bpy.data.curves.new(name=name, type='CURVE')
+		object = bpy.data.objects.new(name=name, object_data=data)
+		context.scene.objects.link(object)
+
+		if operator.create_empty and not operator.convert:
+
+			pipe_object.select = True
+			bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
+			pipe_object.select = False
+
+		data.fill_mode = 'NONE'
+		data.bevel_depth = random_float(operator.min*0.5, operator.max*0.5)
+		data.bevel_resolution = operator.surface
+
+		object.rotation_euler.x = pi*0.5
+
+		return object
