@@ -4,6 +4,7 @@ from mathutils import Vector
 from random import seed
 from random import randint as random_integer
 from random import uniform as random_float
+from random import choice
 
 
 class generate:
@@ -76,6 +77,8 @@ class generate:
 				coord_x = self.keep_inside(last_x+random_float(-operator.length_x, operator.length_x), pipe.data.bevel_depth, operator.width*0.5)
 				coord_y = self.keep_inside(last_y+random_float(operator.length_y*0.1, operator.length_y), pipe.data.bevel_depth, operator.height)
 
+				# check if coord_x is > last_x by bevel_depth, if not skip bend
+
 				spline.points.add(count=2)
 
 				spline.points[-2].co.x = last_x
@@ -91,6 +94,13 @@ class generate:
 				spline.points.add(count=1)
 				spline.points[-1].co.x = last_x
 				spline.points[-1].co.y = operator.height
+
+			flip = choice([True, False])
+
+			if flip:
+
+				pipe.rotation_euler.x = -pi * 0.5
+				pipe.location.z = operator.height
 
 
 		@staticmethod
