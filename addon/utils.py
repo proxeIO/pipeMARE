@@ -92,42 +92,6 @@ class generate:
 				spline.points[-1].co.x = last_x
 				spline.points[-1].co.y = operator.height
 
-			# while last_y < operator.height:
-			#
-			# 	spline.points.add(count=2)
-			#
-			# 	point1 = spline.points[-2]
-			# 	point2 = spline.points[-1]
-			#
-			# 	point1.co.x = last_x
-			# 	point1.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
-			#
-			# 	last_y = point1.co.y
-			#
-			# 	point2.co.x = last_x + random_float(-operator.length_x, operator.length_x)
-			# 	point2.co.y = last_y
-			#
-			# 	if point2.co.x > operator.width * 0.5:
-			#
-			# 		point2.co.x -= point2.co.x - operator.width * 0.5
-			#
-			# 	if point2.co.x < -operator.width * 0.5:
-			#
-			# 		point2.co.x -= point2.co.x + operator.width * 0.5
-			#
-			# 	last_x = point2.co.x
-			#
-			# else:
-			#
-			# 	spline.points[-1].co.y = operator.height
-			# 	spline.points[-1].co.x = last_x
-			#
-			# 	if spline.points[-2].co.y > operator.height:
-			#
-			# 		self.delete_point(context, pipe, spline.points[-1])
-			#
-			# 		spline.points[-2].co.y = operator.height
-
 
 		@staticmethod
 		def bevel():
