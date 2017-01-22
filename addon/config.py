@@ -3,6 +3,7 @@ defaults = {
 	'width': 1.0,
 	'height': 2.0,
 	'depth': 0.5,
+	'uniform': False,
 	'length_x': 0.5,
 	'length_y': 0.5,
 	'min': 0.01,

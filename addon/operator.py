@@ -18,7 +18,7 @@ class pipe_nightmare(Operator):
 	amount = IntProperty(
 		name = 'Pipes',
 		description = 'Number of pipes',
-		min = 0,
+		min = 1,
 		max = 1000,
 		default = default['amount']
 	)
@@ -48,6 +48,12 @@ class pipe_nightmare(Operator):
 		min = 0.01,
 		soft_max = 10.0,
 		default = default['depth']
+	)
+
+	uniform = BoolProperty(
+		name = 'Uniform Placement',
+		description = 'Place the generated pipes at equal intervals throughout the region depth.',
+		default = default['uniform']
 	)
 
 	length_x = FloatProperty(
@@ -158,6 +164,8 @@ class pipe_nightmare(Operator):
 		description = 'Create an empty as the parent for all the pipes. (Slower but allows for easier control)',
 		default = default['create_empty']
 	)
+
+	depth_locations = []
 
 	@classmethod
 	def poll(operator, context):

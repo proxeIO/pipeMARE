@@ -8,7 +8,10 @@ def operator(operator, context):
 	column.prop(operator, 'amount')
 	column.prop(operator, 'width')
 	column.prop(operator, 'height')
-	column.prop(operator, 'depth')
+
+	row = column.row(align=True)
+	row.prop(operator, 'depth')
+	row.prop(operator, 'uniform', text='', icon='ALIGN')
 
 	column.label(text='Length:')
 	column.prop(operator, 'length_x')
