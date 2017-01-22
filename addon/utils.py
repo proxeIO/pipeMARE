@@ -234,12 +234,6 @@ class create:
 		object.rotation_euler.x = pi * 0.5
 		object.location = context.space_data.cursor_location
 
-		# if operator.uniform:
-		#
-		# 	if operator.amount > 1:
-		#
-		# 		object.location.y += operator.depth_locations[index] - operator.depth * 0.5
-
 		return object
 
 
