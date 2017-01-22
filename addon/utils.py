@@ -12,15 +12,13 @@ class generate:
 	class pipe:
 
 
-		def __init__(self, operator, context, pipe):
+		def __init__(self, operator, context, pipe, index):
 
 			spline = pipe.data.splines.new('POLY')
 
 			is_straight_pipe = random_integer(1, 100) < operator.straight
 
-			if not operator.uniform:
-
-				self.depth(operator, pipe, operator.depth*0.5)
+			self.depth(operator, context, pipe, operator.depth*0.5, index)
 
 			if is_straight_pipe:
 
@@ -45,9 +43,17 @@ class generate:
 			return coordinate
 
 
-		def depth(self, operator, pipe, depth):
+		def depth(self, operator, context, pipe, depth, index):
 
 			pipe.location.y += self.keep_inside(random_float(-depth, depth), pipe.data.bevel_depth, depth)
+
+			if operator.uniform:
+
+				pipe.location.y = context.space_data.cursor_location.y
+
+				if operator.amount > 1:
+
+					pipe.location.y += operator.depth_locations[index] - operator.depth * 0.5
 
 
 		def straight(self, operator, pipe, spline):
@@ -178,19 +184,13 @@ class generate:
 
 		if operator.uniform:
 
-			if operator.amount == 1:
-
-				operator.depth_locations.append(0.0)
-
-			else:
-
-				operator.depth_locations = [operator.depth*(index/(operator.amount-1)) for index in range(operator.amount)]
+			operator.depth_locations = [operator.depth*(index/(operator.amount-1)) for index in range(operator.amount)]
 
 		for index in range(operator.amount):
 
 			pipe = create.pipe(operator, context, index)
 
-			self.pipe(operator, context, pipe)
+			self.pipe(operator, context, pipe, index)
 
 
 
@@ -234,11 +234,11 @@ class create:
 		object.rotation_euler.x = pi * 0.5
 		object.location = context.space_data.cursor_location
 
-		if operator.uniform:
-
-			if operator.amount > 1:
-
-				object.location.y += operator.depth_locations[index] - operator.depth * 0.5
+		# if operator.uniform:
+		#
+		# 	if operator.amount > 1:
+		#
+		# 		object.location.y += operator.depth_locations[index] - operator.depth * 0.5
 
 		return object
 
