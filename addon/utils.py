@@ -71,7 +71,18 @@ class generate:
 
 			while last_y < operator.height - pipe.data.bevel_depth:
 
-				left = choice([True, False])
+				if last_x - pipe.data.bevel_depth <= -operator.width * 0.5:
+
+					left = False
+
+				elif last_x + pipe.data.bevel_depth >= operator.width * 0.5:
+
+					left = True
+
+				else:
+
+					left = choice([True, False])
+
 				thickness = -pipe.data.bevel_depth if left else pipe.data.bevel_depth
 				length_x = -operator.length_x if left else operator.length_x
 				length_x += thickness*2
@@ -180,6 +191,8 @@ class generate:
 			pipe = create.pipe(operator, context, index)
 
 			self.pipe(operator, context, pipe)
+
+
 
 
 class create:
