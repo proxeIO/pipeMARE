@@ -12,68 +12,6 @@ class generate:
 	class pipe:
 
 
-		class bent:
-
-
-			def __init__(self, operator, context, pipe, spline):
-
-				width = operator.width * 0.5
-
-				base = spline.points[-1]
-				base.co.x = random_float(-width, width)
-
-				last_y = 0.0
-				last_x = base.co.x
-
-				while last_y < operator.height:
-
-					spline.points.add(count=2)
-
-					point1 = spline.points[-2]
-					point2 = spline.points[-1]
-
-					point1.co.x = last_x
-					point1.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
-
-					last_y = point1.co.y
-
-					point2.co.x = last_x + random_float(-operator.length_x, operator.length_y)
-					point2.co.y = last_y
-
-					if point2.co.x > operator.width * 0.5:
-
-						point2.co.x -= point2.co.x - operator.width * 0.5
-
-					if point2.co.x < -operator.width * 0.5:
-
-						point2.co.x -= point2.co.x + operator.width * 0.5
-
-					last_x = point2.co.x
-
-				else:
-
-					spline.points[-1].co.y = operator.height
-					spline.points[-1].co.x = last_x
-
-					if spline.points[-2].co.y > operator.height:
-
-						spline.points[-1].select = True
-						spline.points[-2].co.y = operator.height
-
-
-						old_active_object = bpy.data.objects[context.active_object.name] if context.active_object else None
-
-						context.scene.objects.active = pipe
-
-						bpy.ops.object.mode_set(mode='EDIT')
-						bpy.ops.curve.delete(type='VERT')
-						bpy.ops.object.mode_set(mode='OBJECT')
-
-						if old_active_object:
-
-							context.scene.objects.active = old_active_object
-
-
 		def __init__(self, operator, context, pipe):
 
 			spline = pipe.data.splines.new('POLY')
@@ -82,37 +20,137 @@ class generate:
 
 			if is_straight_pipe:
 
-				self.depth(pipe, operator.depth)
-
-				self.straight(spline, operator.height, operator.width)
+				self.straight(operator, pipe, spline)
 
 			else:
-
-				self.depth(pipe, operator.depth)
 
 				self.bent(operator, context, pipe, spline)
 
 
 		@staticmethod
-		def depth(pipe, depth):
+		def keep_inside(coordinate, thickness_offset, limit):
 
-			depth = depth * 0.5
+			if coordinate + thickness_offset > limit:
 
-			pipe.location.y = random_float(-depth, depth)
+				coordinate = coordinate - thickness_offset - (coordinate - limit)
+
+			elif coordinate - thickness_offset < -limit:
+
+				coordinate = coordinate + thickness_offset - (coordinate + limit)
+
+			return coordinate
 
 
-		@staticmethod
-		def straight(spline, height, width):
+		def depth(self, pipe, depth):
 
-			width = width * 0.5
+			pipe.location.y = self.keep_inside(random_float(-depth, depth), pipe.data.bevel_depth, depth)
 
-			base = spline.points[-1]
-			base.co.x = random_float(-width, width)
+
+		def straight(self, operator, pipe, spline):
+
+			self.depth(pipe, operator.depth*0.5)
+
+			spline.points[-1].co.x = self.keep_inside(random_float(-operator.width*0.5, operator.width*0.5), pipe.data.bevel_depth, operator.width*0.5)
 
 			spline.points.add(count=1)
 
-			spline.points[-1].co.x = base.co.x
-			spline.points[-1].co.y = height
+			spline.points[-1].co.x = spline.points[-2].co.x
+			spline.points[-1].co.y = operator.height
+
+
+		def bent(self, operator, context, pipe, spline):
+
+			self.depth(pipe, operator.depth*0.5)
+
+			spline.points[-1].co.x = self.keep_inside(random_float(-operator.width*0.5, operator.width*0.5), pipe.data.bevel_depth, operator.width*0.5)
+
+			last_y = 0.0
+			last_x = spline.points[-1].co.x
+
+			first_pass = True
+
+			beveled_pipe = random_integer(1, 100) < operator.bevel
+
+			while last_y < operator.height - pipe.data.bevel_depth:
+
+				coord_x = self.keep_inside(last_x+random_float(-operator.length_x, operator.length_x), pipe.data.bevel_depth, operator.width*0.5)
+				coord_y = self.keep_inside(last_y+random_float(operator.length_y*0.1, operator.length_y), pipe.data.bevel_depth, operator.height)
+
+				spline.points.add(count=2)
+
+				spline.points[-2].co.x = last_x
+				spline.points[-2].co.y = coord_y
+				spline.points[-1].co.x = coord_x
+				spline.points[-1].co.y = coord_y
+
+				last_x = coord_x
+				last_y = coord_y
+
+			else:
+
+				spline.points.add(count=1)
+				spline.points[-1].co.x = last_x
+				spline.points[-1].co.y = operator.height
+
+			# while last_y < operator.height:
+			#
+			# 	spline.points.add(count=2)
+			#
+			# 	point1 = spline.points[-2]
+			# 	point2 = spline.points[-1]
+			#
+			# 	point1.co.x = last_x
+			# 	point1.co.y = last_y + random_float(operator.length_y*0.1, operator.length_y)
+			#
+			# 	last_y = point1.co.y
+			#
+			# 	point2.co.x = last_x + random_float(-operator.length_x, operator.length_x)
+			# 	point2.co.y = last_y
+			#
+			# 	if point2.co.x > operator.width * 0.5:
+			#
+			# 		point2.co.x -= point2.co.x - operator.width * 0.5
+			#
+			# 	if point2.co.x < -operator.width * 0.5:
+			#
+			# 		point2.co.x -= point2.co.x + operator.width * 0.5
+			#
+			# 	last_x = point2.co.x
+			#
+			# else:
+			#
+			# 	spline.points[-1].co.y = operator.height
+			# 	spline.points[-1].co.x = last_x
+			#
+			# 	if spline.points[-2].co.y > operator.height:
+			#
+			# 		self.delete_point(context, pipe, spline.points[-1])
+			#
+			# 		spline.points[-2].co.y = operator.height
+
+
+		@staticmethod
+		def bevel():
+
+			pass
+
+
+		@staticmethod
+		def delete_point(context, pipe, point):
+
+			point.select = True
+
+			old_active_object = bpy.data.objects[context.active_object.name] if context.active_object else None
+
+			context.scene.objects.active = pipe
+
+			bpy.ops.object.mode_set(mode='EDIT')
+			bpy.ops.curve.delete(type='VERT')
+			bpy.ops.object.mode_set(mode='OBJECT')
+
+			if old_active_object:
+
+				context.scene.objects.active = old_active_object
 
 
 	def __init__(self, operator, context):
@@ -157,14 +195,14 @@ class create:
 
 		if operator.create_empty and not operator.convert:
 
-			pipe_object.select = True
+			object.select = True
 			bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-			pipe_object.select = False
+			object.select = False
 
 		data.fill_mode = 'NONE'
 		data.bevel_depth = random_float(operator.min*0.5, operator.max*0.5)
 		data.bevel_resolution = operator.surface
 
-		object.rotation_euler.x = pi*0.5
+		object.rotation_euler.x = pi * 0.5
 
 		return object

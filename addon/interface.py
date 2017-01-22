@@ -23,7 +23,7 @@ def operator(operator, context):
 	# column.prop(operator, 'decoration')
 	# column.prop(operator, 'rail')
 	# column.prop(operator, 'split')
-	# column.prop(operator, 'bevel')
+	column.prop(operator, 'bevel')
 
 	column.label(text='Resolution:')
 	column.prop(operator, 'surface')
