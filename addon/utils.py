@@ -1,10 +1,9 @@
 import bpy
 from math import pi
 from mathutils import Vector
-from random import seed
+from random import seed, choice
 from random import randint as random_integer
 from random import uniform as random_float
-from random import choice
 
 
 class generate:
@@ -74,10 +73,12 @@ class generate:
 
 			while last_y < operator.height - pipe.data.bevel_depth:
 
-				coord_x = self.keep_inside(last_x+random_float(-operator.length_x, operator.length_x), pipe.data.bevel_depth, operator.width*0.5)
-				coord_y = self.keep_inside(last_y+random_float(operator.length_y*0.1, operator.length_y), pipe.data.bevel_depth, operator.height)
-
-				# check if coord_x is > last_x by bevel_depth, if not skip bend
+				left = choice([True, False])
+				thickness = -pipe.data.bevel_depth if left else pipe.data.bevel_depth
+				length_x = -operator.length_x if left else operator.length_x
+				length_x += thickness*2
+				coord_x = self.keep_inside(last_x+random_float(thickness*2, length_x), pipe.data.bevel_depth, operator.width*0.5)
+				coord_y = self.keep_inside(last_y+random_float(pipe.data.bevel_depth*2, operator.length_y+pipe.data.bevel_depth*2), pipe.data.bevel_depth, operator.height)
 
 				spline.points.add(count=2)
 
