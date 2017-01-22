@@ -43,7 +43,7 @@ class generate:
 
 		def depth(self, pipe, depth):
 
-			pipe.location.y = self.keep_inside(random_float(-depth, depth), pipe.data.bevel_depth, depth)
+			pipe.location.y += self.keep_inside(random_float(-depth, depth), pipe.data.bevel_depth, depth)
 
 
 		def straight(self, operator, pipe, spline):
@@ -101,7 +101,7 @@ class generate:
 			if flip:
 
 				pipe.rotation_euler.x = -pi * 0.5
-				pipe.location.z = operator.height
+				pipe.location.z += operator.height
 
 
 		@staticmethod
@@ -155,7 +155,8 @@ class create:
 		context.scene.objects.active = empty
 
 		empty.empty_draw_type = 'CUBE'
-		empty.location.z = operator.height * 0.5
+		empty.location = context.space_data.cursor_location
+		empty.location.z += operator.height * 0.5
 		empty.scale = Vector((operator.width*0.5, operator.depth*0.5, operator.height*0.5))
 
 
@@ -179,5 +180,6 @@ class create:
 		data.bevel_resolution = operator.surface
 
 		object.rotation_euler.x = pi * 0.5
+		object.location = context.space_data.cursor_location
 
 		return object
