@@ -56,22 +56,40 @@ class pipe_nightmare(Operator):
 		default = default['uniform']
 	)
 
-	length_x = FloatProperty(
-		name = 'X',
+	length_x_min = FloatProperty(
+		name = 'Minimum Y',
+		description = 'Minimum length of horizantal pipes.',
+		subtype = 'DISTANCE',
+		min = 0.001,
+		soft_max = 10.0,
+		default = default['length_x_min']
+	)
+
+	length_x_max = FloatProperty(
+		name = 'Maximum Y',
 		description = 'Maximum length of horizantal pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
 		soft_max = 10.0,
-		default = default['length_x']
+		default = default['length_x_max']
 	)
 
-	length_y = FloatProperty(
-		name = 'Y',
+	length_y_min = FloatProperty(
+		name = 'Minimum X',
+		description = 'Minimum length of vertical pipes.',
+		subtype = 'DISTANCE',
+		min = 0.001,
+		soft_max = 10.0,
+		default = default['length_y_min']
+	)
+
+	length_y_max = FloatProperty(
+		name = 'Maximum X',
 		description = 'Maximum length of vertical pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
 		soft_max = 10.0,
-		default = default['length_y']
+		default = default['length_y_max']
 	)
 
 	min = FloatProperty(

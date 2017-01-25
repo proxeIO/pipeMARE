@@ -13,9 +13,14 @@ def operator(operator, context):
 	row.prop(operator, 'depth')
 	row.prop(operator, 'uniform', text='', icon='ALIGN')
 
-	column.label(text='Length:')
-	column.prop(operator, 'length_x')
-	column.prop(operator, 'length_y')
+	column.label(text='Length X:')
+	row = column.row(align=True)
+	row.prop(operator, 'length_x_min')
+	row.prop(operator, 'length_x_max')
+	column.label(text='Length Y:')
+	row = column.row(align=True)
+	row.prop(operator, 'length_y_min')
+	row.prop(operator, 'length_y_max')
 
 	column.label(text='Thickness:')
 	column.prop(operator, 'min')

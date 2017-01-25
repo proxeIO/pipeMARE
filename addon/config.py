@@ -4,8 +4,10 @@ defaults = {
 	'height': 2.0,
 	'depth': 0.5,
 	'uniform': False,
-	'length_x': 0.5,
-	'length_y': 0.5,
+	'length_x_min': 0.25,
+	'length_x_max': 0.5,
+	'length_y_min': 0.25,
+	'length_y_max': 0.5,
 	'min': 0.01,
 	'max': 0.05,
 	'straight': 40,
@@ -17,5 +19,4 @@ defaults = {
 	'seed': 0,
 	'convert': False,
 	'create_empty': False,
-	'hide_lines': True,
 }

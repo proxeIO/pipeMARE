@@ -36,26 +36,38 @@ class generate:
 								length_x = abs(point[0] - pipe_corners[index + 1][0])
 								length_y = abs(pipe_corners[index - 1][1] - point[1])
 
-								offset_y = -min((length_x, length_y)) * 0.25
-								offset_x = offset_y if point[3] else -offset_y
+								if min((length_x, length_y)) * 0.25 > thickness:
 
-								create.point(spline, point, offset_y=offset_y)
-								create.point(spline, point, offset_x=offset_x)
+									offset_y = -min((length_x, length_y)) * 0.25
+									offset_x = offset_y if point[3] else -offset_y
 
-								point[0] += offset_x
+									create.point(spline, point, offset_y=offset_y)
+									create.point(spline, point, offset_x=offset_x)
+
+									point[0] += offset_x
+
+								else:
+
+									create.point(spline, point)
 
 							else:
 
 								length_x = abs(pipe_corners[index - 1][0] - point[0])
 								length_y = abs(point[1] - pipe_corners[index + 1][1])
 
-								offset_y = min((length_x, length_y)) * 0.25
-								offset_x = offset_y if point[3] else -offset_y
+								if min((length_x, length_y)) * 0.25 > thickness:
 
-								create.point(spline, point, offset_x=offset_x)
-								create.point(spline, point, offset_y=offset_y)
+									offset_y = min((length_x, length_y)) * 0.25
+									offset_x = offset_y if point[3] else -offset_y
 
-								point[1] += offset_y
+									create.point(spline, point, offset_x=offset_x)
+									create.point(spline, point, offset_y=offset_y)
+
+									point[1] += offset_y
+
+								else:
+
+									create.point(spline, point)
 
 						else:
 
@@ -77,15 +89,17 @@ class generate:
 				last_x = spline.points[-1].co.x
 				last_y = 0.0
 
+				first_pass = True
+
 				pipe_corners = [[last_x, last_y]]
 
-				while last_y + operator.length_y + thickness < operator.height:
+				while last_y + abs(operator.length_y_max - thickness) < operator.height - abs(operator.length_y_max - thickness):
 
-					if last_x - thickness * 8 <= -operator.width * 0.5:
+					if last_x - thickness <= -operator.width * 0.5:
 
 						left = False
 
-					elif last_x + thickness * 8 >= operator.width * 0.5:
+					elif last_x + thickness >= operator.width * 0.5:
 
 						left = True
 
@@ -93,12 +107,28 @@ class generate:
 
 						left = choice([True, False])
 
-					coord_y = keep_inside(last_y + random_float(operator.length_y * 0.5 + thickness, operator.length_y), thickness, operator.height)
+					if first_pass:
 
+						left_first = choice([True, False])
+
+						coord_y = random_float(thickness, operator.length_y_max)
+
+						first_pass = False
+
+					else:
+
+						length_y_min = operator.length_y_min + abs(operator.length_y_min - thickness)
+						length_y_max = operator.length_y_max + abs(operator.length_y_max - thickness)
+
+						coord_y = keep_inside(last_y + random_float(length_y_min, length_y_max), thickness, operator.height)
+
+					length_x_min = operator.length_x_min + abs(operator.length_x_min - thickness)
+					length_x_max = operator.length_x_max + abs(operator.length_x_max - thickness)
 					thickness = -thickness if left else thickness
-					length_x = -operator.length_x if left else operator.length_x
+					length_x_min = -length_x_min if left else length_x_min
+					length_x_max = -length_x_max if left else length_x_max
 
-					coord_x = keep_inside(last_x + random_float(length_x * 0.5 + thickness, length_x), thickness, operator.width * 0.5)
+					coord_x = keep_inside(last_x + random_float(length_x_min, length_x_max), thickness, operator.width * 0.5)
 
 					pipe_corners.append([last_x, coord_y, True, left])
 
