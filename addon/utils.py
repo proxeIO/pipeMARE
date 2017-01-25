@@ -81,11 +81,11 @@ class generate:
 
 				while last_y + operator.length_y + thickness < operator.height:
 
-					if last_x - thickness <= -operator.width * 0.5:
+					if last_x - thickness * 8 <= -operator.width * 0.5:
 
 						left = False
 
-					elif last_x + thickness >= operator.width * 0.5:
+					elif last_x + thickness * 8 >= operator.width * 0.5:
 
 						left = True
 
@@ -130,7 +130,7 @@ class generate:
 
 				self.bent(operator, context, pipe, spline, thickness)
 
-			self.align_profile(pipe)
+			self.align_profile(context, pipe)
 
 
 		@staticmethod
@@ -151,11 +151,13 @@ class generate:
 
 
 		@staticmethod
-		def align_profile(pipe):
+		def align_profile(context, pipe):
 
 			point_origin = pipe.data.splines[0].points[0].co
 
-			pipe.data.bevel_object.location = Vector((point_origin.x, pipe.location.y, 0.0))
+			cursor_location = context.space_data.cursor_location
+
+			pipe.data.bevel_object.location = Vector((cursor_location.x + point_origin.x, pipe.location.y, cursor_location.z))
 
 
 		def depth(self, operator, context, pipe, depth, index, thickness):
@@ -276,12 +278,7 @@ class create:
 
 				base = 0.3535533547401428
 
-				points = [
-					[-base, -base],
-					[-base, base],
-					[base, base],
-					[base, -base],
-				]
+				points = [[-base, -base], [-base, base], [base, base], [base, -base]]
 
 				for index, point in enumerate(points):
 
@@ -293,7 +290,6 @@ class create:
 				pass
 
 
-	@staticmethod
 	def curve(operator, context, name):
 
 		data = bpy.data.curves.new(name=name, type='CURVE')
@@ -309,7 +305,6 @@ class create:
 		return curve
 
 
-	@staticmethod
 	def empty(operator, context):
 
 		empty = bpy.data.objects.new(name='Pipes', object_data=None)
@@ -323,7 +318,6 @@ class create:
 		empty.scale = Vector((operator.width * 0.5, operator.depth * 0.5, operator.height * 0.5))
 
 
-	@staticmethod
 	def point(spline, point, offset_x=0.0, offset_y=0.0, index=0, bezier=False):
 
 		if bezier:

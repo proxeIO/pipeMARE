@@ -142,8 +142,8 @@ class pipe_nightmare(Operator):
 	surface = IntProperty(
 		name = 'Surface',
 		description = 'The surface resolution of the pipes.',
-		min = 0,
-		max = 32,
+		min = 1,
+		max = 64,
 		default = default['surface']
 	)
 
