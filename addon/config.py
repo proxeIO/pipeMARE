@@ -13,7 +13,7 @@ defaults = {
 	'rail': 40,
 	'split': 30,
 	'bevel': 35,
-	'surface': 1,
+	'surface': 2,
 	'seed': 0,
 	'convert': False,
 	'create_empty': False,

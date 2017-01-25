@@ -12,99 +12,12 @@ class generate:
 	class pipe:
 
 
-		def __init__(self, operator, context, pipe, index):
-
-			spline = pipe.data.splines.new('POLY')
-
-			is_straight_pipe = random_integer(1, 100) < operator.straight
-
-			self.depth(operator, context, pipe, operator.depth*0.5, index)
-
-			if is_straight_pipe:
-
-				self.straight(operator, pipe, spline)
-
-			else:
-
-				self.bent(operator, context, pipe, spline)
+		class bent:
 
 
-		@staticmethod
-		def keep_inside(coordinate, thickness_offset, limit):
+			def __init__(self, operator, context, pipe, spline, thickness):
 
-			if coordinate + thickness_offset > limit:
-
-				coordinate = coordinate - thickness_offset - (coordinate - limit)
-
-			elif coordinate - thickness_offset < -limit:
-
-				coordinate = coordinate + thickness_offset - (coordinate + limit)
-
-			return coordinate
-
-
-		def depth(self, operator, context, pipe, depth, index):
-
-			pipe.location.y += self.keep_inside(random_float(-depth, depth), pipe.data.bevel_depth, depth)
-
-			if operator.uniform:
-
-				pipe.location.y = context.space_data.cursor_location.y
-
-				if operator.amount > 1:
-
-					pipe.location.y += operator.depth_locations[index] - operator.depth * 0.5
-
-
-		def straight(self, operator, pipe, spline):
-
-			spline.points[-1].co.x = self.keep_inside(random_float(-operator.width*0.5, operator.width*0.5), pipe.data.bevel_depth, operator.width*0.5)
-
-			spline.points.add(count=1)
-
-			spline.points[-1].co.x = spline.points[-2].co.x
-			spline.points[-1].co.y = operator.height
-
-
-		def bent(self, operator, context, pipe, spline):
-
-			spline.points[-1].co.x = self.keep_inside(random_float(-operator.width*0.5, operator.width*0.5), pipe.data.bevel_depth, operator.width*0.5)
-
-			last_x = spline.points[-1].co.x
-			last_y = 0.0
-
-			pipe_corners = [[last_x, last_y]]
-
-			while last_y < operator.height - pipe.data.bevel_depth:
-
-				if last_x - pipe.data.bevel_depth <= -operator.width * 0.5:
-
-					left = False
-
-				elif last_x + pipe.data.bevel_depth >= operator.width * 0.5:
-
-					left = True
-
-				else:
-
-					left = choice([True, False])
-
-				thickness = -pipe.data.bevel_depth if left else pipe.data.bevel_depth
-				length_x = -operator.length_x if left else operator.length_x
-				length_x += thickness*2
-				coord_x = self.keep_inside(last_x+random_float(thickness*2, length_x), pipe.data.bevel_depth, operator.width*0.5)
-				coord_y = self.keep_inside(last_y+random_float(pipe.data.bevel_depth*2, operator.length_y+pipe.data.bevel_depth*2), pipe.data.bevel_depth, operator.height)
-
-				pipe_corners.append([last_x, coord_y, True, left])
-
-				last_x = coord_x
-				last_y = coord_y
-
-				pipe_corners.append([last_x, last_y, False, left])
-
-			else:
-
-				pipe_corners.append([last_x, operator.height])
+				pipe_corners = self.get_corners(operator, context, pipe, spline, thickness)
 
 				is_beveled = random_integer(1, 100) < operator.bevel
 
@@ -120,41 +33,29 @@ class generate:
 
 							if point[2]:
 
-								length_x = abs(point[0]-pipe_corners[index+1][0])
-								length_y = abs(pipe_corners[index-1][1]-point[1])
+								length_x = abs(point[0] - pipe_corners[index + 1][0])
+								length_y = abs(pipe_corners[index - 1][1] - point[1])
 
-								if min((length_x, length_y)) * 0.25 > pipe.data.bevel_depth:
+								offset_y = -min((length_x, length_y)) * 0.25
+								offset_x = offset_y if point[3] else -offset_y
 
-									offset_y = -min((length_x, length_y))*0.25
-									offset_x = offset_y if point[3] else -offset_y
+								create.point(spline, point, offset_y=offset_y)
+								create.point(spline, point, offset_x=offset_x)
 
-									create.point(spline, point, offset_y=offset_y)
-									create.point(spline, point, offset_x=offset_x)
-
-									point[0] += offset_x
-
-								else:
-
-									create.point(spline, point)
+								point[0] += offset_x
 
 							else:
 
-								length_x = abs(pipe_corners[index-1][0]-point[0])
-								length_y = abs(point[1]-pipe_corners[index+1][1])
+								length_x = abs(pipe_corners[index - 1][0] - point[0])
+								length_y = abs(point[1] - pipe_corners[index + 1][1])
 
-								if min((length_x, length_y)) * 0.25 > pipe.data.bevel_depth:
+								offset_y = min((length_x, length_y)) * 0.25
+								offset_x = offset_y if point[3] else -offset_y
 
-									offset_y = min((length_x, length_y))*0.25
-									offset_x = offset_y if point[3] else -offset_y
+								create.point(spline, point, offset_x=offset_x)
+								create.point(spline, point, offset_y=offset_y)
 
-									create.point(spline, point, offset_x=offset_x)
-									create.point(spline, point, offset_y=offset_y)
-
-									point[1] += offset_y
-
-								else:
-
-									create.point(spline, point)
+								point[1] += offset_y
 
 						else:
 
@@ -166,12 +67,118 @@ class generate:
 
 						create.point(spline, point)
 
-			flip = choice([True, False])
 
-			if flip:
+			def get_corners(self, operator, context, pipe, spline, thickness):
 
-				pipe.rotation_euler.x = -pi * 0.5
-				pipe.location.z += operator.height
+				keep_inside = generate.pipe.keep_inside
+
+				spline.points[-1].co.x = keep_inside(random_float(-operator.width * 0.5, operator.width * 0.5), thickness, operator.width * 0.5)
+
+				last_x = spline.points[-1].co.x
+				last_y = 0.0
+
+				pipe_corners = [[last_x, last_y]]
+
+				while last_y + operator.length_y + thickness < operator.height:
+
+					if last_x - thickness <= -operator.width * 0.5:
+
+						left = False
+
+					elif last_x + thickness >= operator.width * 0.5:
+
+						left = True
+
+					else:
+
+						left = choice([True, False])
+
+					coord_y = keep_inside(last_y + random_float(operator.length_y * 0.5 + thickness, operator.length_y), thickness, operator.height)
+
+					thickness = -thickness if left else thickness
+					length_x = -operator.length_x if left else operator.length_x
+
+					coord_x = keep_inside(last_x + random_float(length_x * 0.5 + thickness, length_x), thickness, operator.width * 0.5)
+
+					pipe_corners.append([last_x, coord_y, True, left])
+
+					last_x = coord_x
+					last_y = coord_y
+
+					pipe_corners.append([last_x, last_y, False, left])
+
+				else:
+
+					pipe_corners.append([last_x, operator.height])
+
+				return pipe_corners
+
+
+		def __init__(self, operator, context, pipe, index, thickness):
+
+			spline = pipe.data.splines.new('POLY')
+
+			is_straight_pipe = random_integer(1, 100) < operator.straight
+
+			self.depth(operator, context, pipe, operator.depth * 0.5, index, thickness)
+
+			if is_straight_pipe:
+
+				self.straight(operator, pipe, spline, thickness)
+
+			else:
+
+				self.bent(operator, context, pipe, spline, thickness)
+
+			self.align_profile(pipe)
+
+
+		@staticmethod
+		def keep_inside(coordinate, thickness, limit):
+
+			left = True if coordinate < 0.0 else False
+
+			coordinate = abs(coordinate)
+			thickness = abs(thickness)
+
+			if coordinate + thickness > limit:
+
+				coordinate = coordinate - thickness - abs(coordinate - limit)
+
+			coordinate = -coordinate if left else coordinate
+
+			return coordinate
+
+
+		@staticmethod
+		def align_profile(pipe):
+
+			point_origin = pipe.data.splines[0].points[0].co
+
+			pipe.data.bevel_object.location = Vector((point_origin.x, pipe.location.y, 0.0))
+
+
+		def depth(self, operator, context, pipe, depth, index, thickness):
+
+			pipe.location.y += self.keep_inside(random_float(-depth, depth), thickness, depth)
+
+			if operator.uniform:
+
+				pipe.location.y = context.space_data.cursor_location.y
+
+				if operator.amount > 1:
+
+					pipe.location.y += operator.depth_locations[index] - operator.depth * 0.5
+
+
+		def straight(self, operator, pipe, spline, thickness):
+
+			spline.points[0].co.x = self.keep_inside(random_float(-operator.width * 0.5, operator.width * 0.5), thickness, operator.width * 0.5)
+
+			spline.points.add(count=1)
+
+			spline.points[-1].co.x = spline.points[-2].co.x
+			spline.points[-1].co.y = operator.height
 
 
 	def __init__(self, operator, context):
@@ -184,18 +191,122 @@ class generate:
 
 		if operator.uniform:
 
-			operator.depth_locations = [operator.depth*(index/(operator.amount-1)) for index in range(operator.amount)]
+			if operator.amount > 1:
+
+				operator.depth_locations = [operator.depth * (index / (operator.amount - 1)) for index in range(operator.amount)]
 
 		for index in range(operator.amount):
 
-			pipe = create.pipe(operator, context, index)
+			thickness = random_float(operator.min, operator.max)
 
-			self.pipe(operator, context, pipe, index)
+			pipe = create.pipe(operator, context, index, thickness)
 
-
+			self.pipe(operator, context, pipe, index, thickness)
 
 
 class create:
+
+
+	class profile:
+
+
+		def __new__(self, operator, context, pipe, thickness):
+
+			split = random_integer(1, 100) < operator.split
+			rail = random_integer(1, 100) < operator.split if not split else False
+
+			pipe_profile = create.curve(operator, context, pipe.name+'-profile')
+
+			self.pipe(operator, context, pipe_profile, split, rail)
+			self.set_dimensions(operator, pipe_profile, thickness)
+
+			return pipe_profile
+
+
+		@staticmethod
+		def set_dimensions(operator, pipe_profile, thickness):
+
+			pipe_profile.matrix_world[0][0] = thickness
+			pipe_profile.matrix_world[1][1] = thickness
+
+
+		class pipe:
+
+
+			class split:
+
+
+				def __init__(self, operator, context, pipe):
+
+					choice([self.one, self.two])
+
+
+				def one():
+
+					pass
+
+
+				def two():
+
+					pass
+
+
+			def __init__(self, operator, context, pipe_profile, split, rail):
+
+				spline = pipe_profile.data.splines.new('BEZIER')
+				spline.use_cyclic_u = True
+
+				self.standard(pipe_profile, spline)
+
+				# if split:
+				#
+				# 	self.split(operator, context, pipe)
+				#
+				# elif rail:
+				#
+				# 	self.rail(operator, context, pipe)
+				#
+				# else:
+				#
+				# 	self.standard(operator, context, pipe)
+
+
+			@staticmethod
+			def standard(pipe_profile, spline):
+
+				base = 0.3535533547401428
+
+				points = [
+					[-base, -base],
+					[-base, base],
+					[base, base],
+					[base, -base],
+				]
+
+				for index, point in enumerate(points):
+
+					create.point(spline, point, index=index, bezier=True)
+
+
+			def rail():
+
+				pass
+
+
+	@staticmethod
+	def curve(operator, context, name):
+
+		data = bpy.data.curves.new(name=name, type='CURVE')
+		curve = bpy.data.objects.new(name=name, object_data=data)
+		context.scene.objects.link(curve)
+
+		if operator.create_empty and not operator.convert:
+
+			create.set_parent(curve)
+
+		curve.data.fill_mode = 'NONE'
+
+		return curve
 
 
 	@staticmethod
@@ -209,38 +320,59 @@ class create:
 		empty.empty_draw_type = 'CUBE'
 		empty.location = context.space_data.cursor_location
 		empty.location.z += operator.height * 0.5
-		empty.scale = Vector((operator.width*0.5, operator.depth*0.5, operator.height*0.5))
+		empty.scale = Vector((operator.width * 0.5, operator.depth * 0.5, operator.height * 0.5))
 
 
 	@staticmethod
-	def pipe(operator, context, index):
+	def point(spline, point, offset_x=0.0, offset_y=0.0, index=0, bezier=False):
 
-		name = 'Pipe.{}'.format(str(index+1).zfill(len(str(operator.amount))))
+		if bezier:
 
-		data = bpy.data.curves.new(name=name, type='CURVE')
-		object = bpy.data.objects.new(name=name, object_data=data)
-		context.scene.objects.link(object)
+			if index == 0:
 
-		if operator.create_empty and not operator.convert:
+				spline.bezier_points[0].co.x = point[0] + offset_x
+				spline.bezier_points[0].co.y = point[1] + offset_y
+				spline.bezier_points[0].handle_left_type = 'AUTO'
+				spline.bezier_points[0].handle_right_type = 'AUTO'
 
-			object.select = True
-			bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-			object.select = False
+			else:
 
-		data.fill_mode = 'NONE'
-		data.bevel_depth = random_float(operator.min*0.5, operator.max*0.5)
-		data.bevel_resolution = operator.surface
+				spline.bezier_points.add(count=1)
 
-		object.rotation_euler.x = pi * 0.5
-		object.location = context.space_data.cursor_location
+				spline.bezier_points[-1].co.x = point[0] + offset_x
+				spline.bezier_points[-1].co.y = point[1] + offset_y
+				spline.bezier_points[-1].handle_left_type = 'AUTO'
+				spline.bezier_points[-1].handle_right_type = 'AUTO'
 
-		return object
+		else:
+
+			spline.points.add(count=1)
+
+			spline.points[-1].co.x = point[0] + offset_x
+			spline.points[-1].co.y = point[1] + offset_y
 
 
-	@staticmethod
-	def point(spline, point, offset_x=0.0, offset_y=0.0):
+	def set_parent(pipe):
 
-		spline.points.add(count=1)
+		bpy.ops.object.select_all(action='DESELECT')
 
-		spline.points[-1].co.x = point[0] + offset_x
-		spline.points[-1].co.y = point[1] + offset_y
+		pipe.select = True
+
+		bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
+
+		pipe.select = False
+
+
+	def pipe(operator, context, index, thickness):
+
+		name = 'Pipe.{}'.format(str(index + 1).zfill(len(str(operator.amount))))
+
+		pipe = create.curve(operator, context, name)
+
+		pipe.data.bevel_object = create.profile(operator, context, pipe, thickness)
+		pipe.data.bevel_object.data.resolution_u = operator.surface
+
+		pipe.rotation_euler.x = pi * 0.5
+		pipe.location = context.space_data.cursor_location
+
+		return pipe
