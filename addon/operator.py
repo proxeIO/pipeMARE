@@ -19,7 +19,7 @@ class pipe_nightmare(Operator):
 		name = 'Pipes',
 		description = 'Number of pipes',
 		min = 1,
-		max = 1000,
+		soft_max = 250,
 		default = default['amount']
 	)
 
@@ -27,7 +27,8 @@ class pipe_nightmare(Operator):
 		name = 'Region Width',
 		description = 'Width of the area that the pipes occupy.',
 		subtype = 'DISTANCE',
-		min = 0.01,
+		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['width']
 	)
@@ -36,7 +37,8 @@ class pipe_nightmare(Operator):
 		name = 'Region Height',
 		description = 'Height of the area that the pipes occupy',
 		subtype = 'DISTANCE',
-		min = 0.01,
+		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['height']
 	)
@@ -45,7 +47,8 @@ class pipe_nightmare(Operator):
 		name = 'Region Depth',
 		description = 'Depth of the area that the pipes occupy',
 		subtype = 'DISTANCE',
-		min = 0.01,
+		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['depth']
 	)
@@ -57,37 +60,41 @@ class pipe_nightmare(Operator):
 	)
 
 	length_x_min = FloatProperty(
-		name = 'Minimum Y',
+		name = 'Minimum',
 		description = 'Minimum length of horizantal pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['length_x_min']
 	)
 
 	length_x_max = FloatProperty(
-		name = 'Maximum Y',
+		name = 'Maximum',
 		description = 'Maximum length of horizantal pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['length_x_max']
 	)
 
 	length_y_min = FloatProperty(
-		name = 'Minimum X',
+		name = 'Minimum',
 		description = 'Minimum length of vertical pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['length_y_min']
 	)
 
 	length_y_max = FloatProperty(
-		name = 'Maximum X',
+		name = 'Maximum',
 		description = 'Maximum length of vertical pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
+		soft_min = 0.1,
 		soft_max = 10.0,
 		default = default['length_y_max']
 	)
@@ -97,7 +104,7 @@ class pipe_nightmare(Operator):
 		description = 'The minimum thickness of the pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
-		max = 5.0,
+		soft_max = 0.2,
 		precision = 3,
 		default = default['min']
 	)
@@ -107,7 +114,7 @@ class pipe_nightmare(Operator):
 		description = 'The maximum thickness of the pipes.',
 		subtype = 'DISTANCE',
 		min = 0.001,
-		max = 5.0,
+		soft_max = 0.2,
 		precision = 3,
 		default = default['max']
 	)
@@ -130,15 +137,6 @@ class pipe_nightmare(Operator):
 		default = default['decoration']
 	)
 
-	rail = IntProperty(
-		name = 'Rails',
-		description = 'Amount of pipes that will have additional rails alongside them.',
-		subtype = 'PERCENTAGE',
-		min = 0,
-		max = 100,
-		default = default['rail']
-	)
-
 	split = IntProperty(
 		name = 'Split',
 		description = 'Amount of pipes that should be split up into smaller pipes that occupy the same path.',
@@ -155,6 +153,15 @@ class pipe_nightmare(Operator):
 		min = 0,
 		max = 100,
 		default = default['bevel']
+	)
+
+	bevel_size = IntProperty(
+		name = 'Bevel Size',
+		description = 'Percentage size of the beveled corner compared to shortest length of pipe leading to/from the corner.',
+		subtype = 'PERCENTAGE',
+		min = 0,
+		max = 50,
+		default = default['bevel_size']
 	)
 
 	surface = IntProperty(

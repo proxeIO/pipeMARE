@@ -29,9 +29,9 @@ def operator(operator, context):
 	column.label(text='Details:')
 	column.prop(operator, 'straight')
 	# column.prop(operator, 'decoration')
-	# column.prop(operator, 'rail')
-	# column.prop(operator, 'split')
+	column.prop(operator, 'split')
 	column.prop(operator, 'bevel')
+	column.prop(operator, 'bevel_size')
 
 	column.label(text='Resolution:')
 	column.prop(operator, 'surface')

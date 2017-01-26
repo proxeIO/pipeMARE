@@ -9,7 +9,49 @@ from random import uniform as random_float
 class generate:
 
 
+	def __init__(self, operator, context):
+
+		seed(operator.seed)
+
+		if operator.create_empty and not operator.convert:
+
+			create.empty(operator, context)
+
+		if operator.uniform:
+
+			if operator.amount > 1:
+
+				operator.depth_locations = [operator.depth * (index / (operator.amount - 1)) for index in range(operator.amount)]
+
+		for index in range(operator.amount):
+
+			thickness = random_float(operator.min, operator.max)
+
+			pipe = create.pipe(operator, context, index, thickness)
+
+			self.pipe(operator, context, pipe, index, thickness)
+
+
 	class pipe:
+
+
+		def __init__(self, operator, context, pipe, index, thickness):
+
+			spline = pipe.data.splines.new('POLY')
+
+			is_straight_pipe = random_integer(1, 100) <= operator.straight
+
+			self.depth(operator, context, pipe, operator.depth * 0.5, index, thickness)
+
+			if is_straight_pipe:
+
+				self.straight(operator, pipe, spline, thickness)
+
+			else:
+
+				self.bent(operator, context, pipe, spline, thickness)
+
+			self.align_profile(context, pipe)
 
 
 		class bent:
@@ -19,7 +61,7 @@ class generate:
 
 				pipe_corners = self.get_corners(operator, context, pipe, spline, thickness)
 
-				is_beveled = random_integer(1, 100) < operator.bevel
+				is_beveled = random_integer(1, 100) <= operator.bevel and operator.bevel_size > 0
 
 				if is_beveled:
 
@@ -36,9 +78,9 @@ class generate:
 								length_x = abs(point[0] - pipe_corners[index + 1][0])
 								length_y = abs(pipe_corners[index - 1][1] - point[1])
 
-								if min((length_x, length_y)) * 0.25 > thickness:
+								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * (operator.bevel_size * 0.01):
 
-									offset_y = -min((length_x, length_y)) * 0.25
+									offset_y = -min((length_x, length_y)) * (operator.bevel_size * 0.01)
 									offset_x = offset_y if point[3] else -offset_y
 
 									create.point(spline, point, offset_y=offset_y)
@@ -55,9 +97,9 @@ class generate:
 								length_x = abs(pipe_corners[index - 1][0] - point[0])
 								length_y = abs(point[1] - pipe_corners[index + 1][1])
 
-								if min((length_x, length_y)) * 0.25 > thickness:
+								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * (operator.bevel_size * 0.01):
 
-									offset_y = min((length_x, length_y)) * 0.25
+									offset_y = min((length_x, length_y)) * (operator.bevel_size * 0.01)
 									offset_x = offset_y if point[3] else -offset_y
 
 									create.point(spline, point, offset_x=offset_x)
@@ -89,17 +131,20 @@ class generate:
 				last_x = spline.points[-1].co.x
 				last_y = 0.0
 
-				first_pass = True
-
 				pipe_corners = [[last_x, last_y]]
 
-				while last_y + abs(operator.length_y_max - thickness) < operator.height - abs(operator.length_y_max - thickness):
+				while last_y + operator.length_y_min < operator.height - operator.length_y_min:
 
-					if last_x - thickness <= -operator.width * 0.5:
+					coord_y = keep_inside(last_y + random_float(operator.length_y_min, operator.length_y_max), thickness, operator.height)
+
+					length_x_min = operator.length_x_min
+					length_x_max = operator.length_x_max
+
+					if last_x - length_x_min - thickness <= -operator.width * 0.5:
 
 						left = False
 
-					elif last_x + thickness >= operator.width * 0.5:
+					elif last_x + length_x_min + thickness >= operator.width * 0.5:
 
 						left = True
 
@@ -107,23 +152,6 @@ class generate:
 
 						left = choice([True, False])
 
-					if first_pass:
-
-						left_first = choice([True, False])
-
-						coord_y = random_float(thickness, operator.length_y_max)
-
-						first_pass = False
-
-					else:
-
-						length_y_min = operator.length_y_min + abs(operator.length_y_min - thickness)
-						length_y_max = operator.length_y_max + abs(operator.length_y_max - thickness)
-
-						coord_y = keep_inside(last_y + random_float(length_y_min, length_y_max), thickness, operator.height)
-
-					length_x_min = operator.length_x_min + abs(operator.length_x_min - thickness)
-					length_x_max = operator.length_x_max + abs(operator.length_x_max - thickness)
 					thickness = -thickness if left else thickness
 					length_x_min = -length_x_min if left else length_x_min
 					length_x_max = -length_x_max if left else length_x_max
@@ -142,25 +170,6 @@ class generate:
 					pipe_corners.append([last_x, operator.height])
 
 				return pipe_corners
-
-
-		def __init__(self, operator, context, pipe, index, thickness):
-
-			spline = pipe.data.splines.new('POLY')
-
-			is_straight_pipe = random_integer(1, 100) < operator.straight
-
-			self.depth(operator, context, pipe, operator.depth * 0.5, index, thickness)
-
-			if is_straight_pipe:
-
-				self.straight(operator, pipe, spline, thickness)
-
-			else:
-
-				self.bent(operator, context, pipe, spline, thickness)
-
-			self.align_profile(context, pipe)
 
 
 		@staticmethod
@@ -213,29 +222,6 @@ class generate:
 			spline.points[-1].co.y = operator.height
 
 
-	def __init__(self, operator, context):
-
-		seed(operator.seed)
-
-		if operator.create_empty and not operator.convert:
-
-			create.empty(operator, context)
-
-		if operator.uniform:
-
-			if operator.amount > 1:
-
-				operator.depth_locations = [operator.depth * (index / (operator.amount - 1)) for index in range(operator.amount)]
-
-		for index in range(operator.amount):
-
-			thickness = random_float(operator.min, operator.max)
-
-			pipe = create.pipe(operator, context, index, thickness)
-
-			self.pipe(operator, context, pipe, index, thickness)
-
-
 class create:
 
 
@@ -244,8 +230,8 @@ class create:
 
 		def __new__(self, operator, context, pipe, thickness):
 
-			split = random_integer(1, 100) < operator.split
-			rail = random_integer(1, 100) < operator.split if not split else False
+			split = random_integer(1, 100) <= operator.split
+			rail = random_integer(1, 100) <= operator.split if not split else False
 
 			pipe_profile = create.curve(operator, context, pipe.name+'-profile')
 
@@ -255,69 +241,310 @@ class create:
 			return pipe_profile
 
 
-		@staticmethod
-		def set_dimensions(operator, pipe_profile, thickness):
-
-			pipe_profile.matrix_world[0][0] = thickness
-			pipe_profile.matrix_world[1][1] = thickness
-
-
 		class pipe:
+
+
+			def __init__(self, operator, context, pipe_profile, split, rail):
+
+				split = random_integer(1, 100) <= operator.split
+
+				if split:
+
+					self.split(pipe_profile)
+
+				else:
+
+					self.standard(pipe_profile)
 
 
 			class split:
 
 
-				def __init__(self, operator, context, pipe):
+				def __init__(self, pipe_profile):
 
-					choice([self.one, self.two])
-
-
-				def one():
-
-					pass
+					type = ['single', 'double']
+					getattr(self, type[random_integer(0, 1)])(pipe_profile)
 
 
-				def two():
-
-					pass
+				class single:
 
 
-			def __init__(self, operator, context, pipe_profile, split, rail):
+					def __init__(self, pipe_profile):
+
+
+						spline1 = pipe_profile.data.splines.new('BEZIER')
+						spline1.use_cyclic_u = True
+
+						spline2 = pipe_profile.data.splines.new('BEZIER')
+						spline2.use_cyclic_u = True
+
+						type = ['type1', 'type2', 'type3']
+						getattr(self, type[random_integer(0, 2)])(pipe_profile, spline1, spline2)
+
+
+					@staticmethod
+					def type1(pipe_profile, spline1, spline2):
+
+						coordinates1 = [
+							[-0.4304378628730774, -0.16793787479400635],
+							[-0.4304378628730774, 0.16793787479400635],
+							[-0.09456212818622589, 0.16793787479400635],
+							[-0.09456212818622589, -0.16793787479400635],
+						]
+
+						coordinates2 = [
+							[0.09456212818622589, -0.16793787479400635],
+							[0.09456212818622589, 0.16793787479400635],
+							[0.4304378628730774, 0.16793787479400635],
+							[0.4304378628730774, -0.16793787479400635],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+
+					@staticmethod
+					def type2(pipe_profile, spline1, spline2):
+
+						coordinates1 = [
+							[-0.4267767071723938, -0.1767767071723938],
+							[-0.4267767071723938, 0.1767767071723938],
+							[-0.0732232928276062, 0.1767767071723938],
+							[-0.0732232928276062, -0.1767767071723938],
+						]
+
+						coordinates2 = [
+							[0.17991751432418823, -0.13258254528045654],
+							[0.17991751432418823, 0.13258254528045654],
+							[0.44508254528045654, 0.13258254528045654],
+							[0.44508254528045654, -0.13258254528045654],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+
+					@staticmethod
+					def type3(pipe_profile, spline1, spline2):
+
+						coordinates1 = [
+							[0.4892767667770386, 0.1767767071723938],
+							[0.4892767667770386, -0.1767767071723938],
+							[0.13572333753108978, -0.1767767071723938],
+							[0.13572333753108978, 0.1767767071723938],
+						]
+
+						coordinates2 = [
+							[-0.11741745471954346, 0.13258254528045654],
+							[-0.11741745471954346, -0.13258254528045654],
+							[-0.38258248567581177, -0.13258254528045654],
+							[-0.38258248567581177, 0.13258254528045654],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+
+				class double:
+
+
+					def __init__(self, pipe_profile):
+
+						spline1 = pipe_profile.data.splines.new('BEZIER')
+						spline1.use_cyclic_u = True
+
+						spline2 = pipe_profile.data.splines.new('BEZIER')
+						spline2.use_cyclic_u = True
+
+						spline3 = pipe_profile.data.splines.new('BEZIER')
+						spline3.use_cyclic_u = True
+
+						type = ['type1', 'type2', 'type3', 'type4']
+						getattr(self, type[random_integer(0, 3)])(pipe_profile, spline1, spline2, spline3)
+
+					@staticmethod
+					def type1(pipe_profile, spline1, spline2, spline3):
+
+						coordinates1 = [
+							[-0.1060660183429718, -0.1060660183429718],
+							[-0.1060660183429718, 0.1060660183429718],
+							[0.1060660183429718, 0.1060660183429718],
+							[0.1060660183429718, -0.1060660183429718],
+						]
+
+						coordinates2 = [
+							[0.24393399059772491, -0.1060660183429718],
+							[0.24393399059772491, 0.1060660183429718],
+							[0.4560660123825073, 0.1060660183429718],
+							[0.4560660123825073, -0.1060660183429718],
+						]
+
+						coordinates3 = [
+							[-0.4560660123825073, -0.1060660183429718],
+							[-0.4560660123825073, 0.1060660183429718],
+							[-0.24393399059772491, 0.1060660183429718],
+							[-0.24393399059772491, -0.1060660183429718],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates3):
+
+							create.point(spline3, point, index=index, bezier=True)
+
+
+					@staticmethod
+					def type2(pipe_profile, spline1, spline2, spline3):
+
+						coordinates1 = [
+							[-0.2121320366859436, -0.2121320366859436],
+							[-0.2121320366859436, 0.2121320366859436],
+							[0.2121320366859436, 0.2121320366859436],
+							[0.2121320366859436, -0.2121320366859436],
+						]
+
+						coordinates2 = [
+							[0.37196701765060425, -0.0530330091714859],
+							[0.37196701765060425, 0.0530330091714859],
+							[0.47803300619125366, 0.0530330091714859],
+							[0.47803300619125366, -0.0530330091714859],
+						]
+
+						coordinates3 = [
+							[-0.47803300619125366, -0.0530330091714859],
+							[-0.47803300619125366, 0.0530330091714859],
+							[-0.37196701765060425, 0.0530330091714859],
+							[-0.37196701765060425, -0.0530330091714859],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates3):
+
+							create.point(spline3, point, index=index, bezier=True)
+
+
+					@staticmethod
+					def type3(pipe_profile, spline1, spline2, spline3):
+
+						coordinates1 = [
+							[-0.41213202476501465, -0.2121320366859436],
+							[-0.41213202476501465, 0.2121320366859436],
+							[0.012132033705711365, 0.2121320366859436],
+							[0.012132033705711365, -0.2121320366859436],
+						]
+
+						coordinates2 = [
+							[0.37196701765060425, -0.0530330091714859],
+							[0.37196701765060425, 0.0530330091714859],
+							[0.47803300619125366, 0.0530330091714859],
+							[0.47803300619125366, -0.0530330091714859],
+						]
+
+						coordinates3 = [
+							[0.17196696996688843, -0.0530330091714859],
+							[0.17196696996688843, 0.0530330091714859],
+							[0.27803295850753784, 0.0530330091714859],
+							[0.27803295850753784, -0.0530330091714859],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates3):
+
+							create.point(spline3, point, index=index, bezier=True)
+
+
+					@staticmethod
+					def type4(pipe_profile, spline1, spline2, spline3):
+
+						coordinates1 = [
+							[0.41213202476501465, 0.2121320366859436],
+							[0.41213202476501465, -0.2121320366859436],
+							[-0.012132033705711365, -0.2121320366859436],
+							[-0.012132033705711365, 0.2121320366859436],
+						]
+
+						coordinates2 = [
+							[-0.37196701765060425, 0.0530330091714859],
+							[-0.37196701765060425, -0.0530330091714859],
+							[-0.47803300619125366, -0.0530330091714859],
+							[-0.47803300619125366, 0.0530330091714859],
+						]
+
+						coordinates3 = [
+							[-0.17196696996688843, 0.0530330091714859],
+							[-0.17196696996688843, -0.0530330091714859],
+							[-0.27803295850753784, -0.0530330091714859],
+							[-0.27803295850753784, 0.0530330091714859],
+						]
+
+						for index, point in enumerate(coordinates1):
+
+							create.point(spline1, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates2):
+
+							create.point(spline2, point, index=index, bezier=True)
+
+						for index, point in enumerate(coordinates3):
+
+							create.point(spline3, point, index=index, bezier=True)
+
+
+			@staticmethod
+			def standard(pipe_profile):
 
 				spline = pipe_profile.data.splines.new('BEZIER')
 				spline.use_cyclic_u = True
 
-				self.standard(pipe_profile, spline)
-
-				# if split:
-				#
-				# 	self.split(operator, context, pipe)
-				#
-				# elif rail:
-				#
-				# 	self.rail(operator, context, pipe)
-				#
-				# else:
-				#
-				# 	self.standard(operator, context, pipe)
-
-
-			@staticmethod
-			def standard(pipe_profile, spline):
-
 				base = 0.3535533547401428
 
-				points = [[-base, -base], [-base, base], [base, base], [base, -base]]
+				coordinates = [[-base, -base], [-base, base], [base, base], [base, -base]]
 
-				for index, point in enumerate(points):
+				for index, point in enumerate(coordinates):
 
 					create.point(spline, point, index=index, bezier=True)
 
 
-			def rail():
+		@staticmethod
+		def set_dimensions(operator, pipe_profile, thickness):
 
-				pass
+			pipe_profile.matrix_world[0][0] = thickness
+			pipe_profile.matrix_world[1][1] = thickness
 
 
 	def curve(operator, context, name):
