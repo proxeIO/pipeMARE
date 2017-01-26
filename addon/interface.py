@@ -53,6 +53,7 @@ def operator(operator, context):
 					space_data = space
 
 	column.prop(space_data, 'show_relationship_lines')
+	# column.prop(operator, 'tile')
 
 
 def menu_entry(menu, context):

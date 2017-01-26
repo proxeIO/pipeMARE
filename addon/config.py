@@ -19,4 +19,5 @@ defaults = {
 	'seed': 0,
 	'convert': False,
 	'create_empty': False,
+	'tile': False,
 }

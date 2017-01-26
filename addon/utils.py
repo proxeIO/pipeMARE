@@ -78,7 +78,7 @@ class generate:
 								length_x = abs(point[0] - pipe_corners[index + 1][0])
 								length_y = abs(pipe_corners[index - 1][1] - point[1])
 
-								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * (operator.bevel_size * 0.01):
+								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * 0.5:
 
 									offset_y = -min((length_x, length_y)) * (operator.bevel_size * 0.01)
 									offset_x = offset_y if point[3] else -offset_y
@@ -97,7 +97,7 @@ class generate:
 								length_x = abs(pipe_corners[index - 1][0] - point[0])
 								length_y = abs(point[1] - pipe_corners[index + 1][1])
 
-								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * (operator.bevel_size * 0.01):
+								if min((length_x, length_y)) * (operator.bevel_size * 0.01) > thickness * 0.5:
 
 									offset_y = min((length_x, length_y)) * (operator.bevel_size * 0.01)
 									offset_x = offset_y if point[3] else -offset_y
@@ -133,9 +133,15 @@ class generate:
 
 				pipe_corners = [[last_x, last_y]]
 
-				while last_y + operator.length_y_min < operator.height - operator.length_y_min:
+				while last_y < operator.height:
 
 					coord_y = keep_inside(last_y + random_float(operator.length_y_min, operator.length_y_max), thickness, operator.height)
+
+					if coord_y + min(operator.length_y_min, operator.length_y_max) > operator.height:
+
+						pipe_corners.append([last_x, operator.height])
+
+						break
 
 					length_x_min = operator.length_x_min
 					length_x_max = operator.length_x_max
@@ -164,10 +170,6 @@ class generate:
 					last_y = coord_y
 
 					pipe_corners.append([last_x, last_y, False, left])
-
-				else:
-
-					pipe_corners.append([last_x, operator.height])
 
 				return pipe_corners
 

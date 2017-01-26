@@ -190,6 +190,12 @@ class pipe_nightmare(Operator):
 		default = default['create_empty']
 	)
 
+	tile = BoolProperty(
+		name = 'Tileable',
+		description = 'Make the pipes tileable along the Y axis.',
+		default = default['tile']
+	)
+
 	depth_locations = []
 
 	@classmethod
