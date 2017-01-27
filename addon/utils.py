@@ -233,11 +233,10 @@ class create:
 		def __new__(self, operator, context, pipe, thickness):
 
 			split = random_integer(1, 100) <= operator.split
-			rail = random_integer(1, 100) <= operator.split if not split else False
 
 			pipe_profile = create.curve(operator, context, pipe.name+'-profile')
 
-			self.pipe(operator, context, pipe_profile, split, rail)
+			self.pipe(operator, context, pipe_profile, split, thickness)
 			self.set_dimensions(operator, pipe_profile, thickness)
 
 			return pipe_profile
@@ -246,13 +245,13 @@ class create:
 		class pipe:
 
 
-			def __init__(self, operator, context, pipe_profile, split, rail):
+			def __init__(self, operator, context, pipe_profile, split, thickness):
 
-				split = random_integer(1, 100) <= operator.split
+				type = 'single' if thickness < operator.max * 0.75 else None
 
 				if split:
 
-					self.split(pipe_profile)
+					self.split(pipe_profile, type=type)
 
 				else:
 
@@ -262,10 +261,10 @@ class create:
 			class split:
 
 
-				def __init__(self, pipe_profile):
+				def __init__(self, pipe_profile, type=None):
 
-					type = ['single', 'double']
-					getattr(self, type[random_integer(0, 1)])(pipe_profile)
+					type = ['single', 'double'][random_integer(0, 1)] if not type else type
+					getattr(self, type)(pipe_profile)
 
 
 				class single:
