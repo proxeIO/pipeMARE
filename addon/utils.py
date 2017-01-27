@@ -131,13 +131,23 @@ class generate:
 				last_x = spline.points[-1].co.x
 				last_y = 0.0
 
+				first_pass = True
+
 				pipe_corners = [[last_x, last_y]]
 
 				while last_y < operator.height:
 
-					coord_y = keep_inside(last_y + random_float(operator.length_y_min, operator.length_y_max), thickness, operator.height)
+					if first_pass:
 
-					if coord_y + min(operator.length_y_min, operator.length_y_max) > operator.height:
+						coord_y = keep_inside(last_y + random_float(operator.length_y_min, operator.length_y_max) * 0.5 , thickness, operator.height)
+
+						first_pass = False
+
+					else:
+
+						coord_y = keep_inside(last_y + random_float(operator.length_y_min, operator.length_y_max) , thickness, operator.height)
+
+					if coord_y + min(operator.length_y_min, operator.length_y_max) * 0.5 > operator.height:
 
 						pipe_corners.append([last_x, operator.height])
 
