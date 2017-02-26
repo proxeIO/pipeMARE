@@ -25,7 +25,7 @@ class generate:
 
         for index in range(operator.amount):
 
-            thickness = random_float(operator.min, operator.max)
+            thickness = random_float(operator.thickness_min, operator.thickness_max)
 
             pipe = create.pipe(operator, context, index, thickness)
 
@@ -257,7 +257,7 @@ class create:
 
             def __init__(self, operator, context, pipe_profile, split, thickness):
 
-                type = 'single' if thickness < operator.max * 0.75 else None
+                type = 'single' if thickness < operator.thickness_max * 0.75 else None
 
                 if split:
 

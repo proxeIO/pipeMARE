@@ -15,16 +15,18 @@ def operator(operator, context):
 
     column.label(text='Length X:')
     row = column.row(align=True)
-    row.prop(operator, 'length_x_min')
-    row.prop(operator, 'length_x_max')
+    row.prop(operator, 'length_x_min', text='Min')
+    row.prop(operator, 'length_x_max', text='Max')
+
     column.label(text='Length Y:')
     row = column.row(align=True)
-    row.prop(operator, 'length_y_min')
-    row.prop(operator, 'length_y_max')
+    row.prop(operator, 'length_y_min', text='Min')
+    row.prop(operator, 'length_y_max', text='Max')
 
     column.label(text='Thickness:')
-    column.prop(operator, 'min')
-    column.prop(operator, 'max')
+    row = column.row(align=True)
+    row.prop(operator, 'thickness_min', text='Min')
+    row.prop(operator, 'thickness_max', text='Max')
 
     column.label(text='Details:')
     column.prop(operator, 'straight')

@@ -3,9 +3,8 @@ import bpy
 from bpy.types import Operator
 from bpy.props import BoolProperty, IntProperty, FloatProperty
 
-from . import interface
+from . import interface, utilities
 from .config import defaults as default
-from .utils import generate
 
 
 class pipe_nightmare(Operator):
@@ -99,24 +98,24 @@ class pipe_nightmare(Operator):
         default = default['length_y_max']
     )
 
-    min = FloatProperty(
+    thickness_min = FloatProperty(
         name = 'Minimum',
         description = 'The minimum thickness of the pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_max = 0.2,
         precision = 3,
-        default = default['min']
+        default = default['thickness_min']
     )
 
-    max = FloatProperty(
+    thickness_max = FloatProperty(
         name = 'Maximum',
         description = 'The maximum thickness of the pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_max = 0.2,
         precision = 3,
-        default = default['max']
+        default = default['thickness_max']
     )
 
     straight = IntProperty(
@@ -216,6 +215,6 @@ class pipe_nightmare(Operator):
 
     def execute(self, context):
 
-        generate(self, context)
+        utilities.generate(self, context)
 
         return {'FINISHED'}
