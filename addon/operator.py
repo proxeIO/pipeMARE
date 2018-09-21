@@ -3,7 +3,7 @@ import bpy
 from bpy.types import Operator
 from bpy.props import BoolProperty, IntProperty, FloatProperty
 
-from . import interface, utilities
+from . import interface, utility
 from .config import defaults as default
 
 
@@ -215,6 +215,6 @@ class pipe_nightmare(Operator):
 
     def execute(self, context):
 
-        utilities.generate(self, context)
+        utility.generate(self, context)
 
         return {'FINISHED'}
