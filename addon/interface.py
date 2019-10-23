@@ -45,10 +45,10 @@ def operator(ot, context):
     column.label(text='Misc:')
     column.prop(ot, 'seed')
 
-    column.separator()
-    row = column.row()
-    row.label(text='Up Axis:')
-    row.prop(ot, 'up_axis', text='')
+    # column.separator()
+    # row = column.row()
+    # row.label(text='Up Axis:')
+    # row.prop(ot, 'up_axis', text='')
 
     column.separator()
 

@@ -20,6 +20,8 @@ class generate:
 
         for index in range(ot.amount):
             thickness = random_float(ot.thickness_min, ot.thickness_max)
+            if ot.thickness_min > ot.thickness_max:
+                thickness = ot.thickness_max
 
             pipe = create.pipe(ot, context, index, thickness)
 
