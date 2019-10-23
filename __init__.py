@@ -14,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
     'name': 'Pipe Nightmare',
-    'author': 'Trentin Frederick (proxe)',
+    'author': 'proxe',
     'version': (0, 3, 33),
     'blender': (2, 80, 0),
     'location': 'View 3D -> Add -> Curve -> Pipes',
