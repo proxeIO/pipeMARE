@@ -20,4 +20,5 @@ defaults = {
     'convert': False,
     'create_empty': False,
     'tile': False,
+    'up_axis': 'Z',
 }

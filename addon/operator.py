@@ -1,220 +1,212 @@
 import bpy
 
-from bpy.types import Operator
-from bpy.props import BoolProperty, IntProperty, FloatProperty
+from mathutils import Vector, Matrix
+
+from bpy.types import Operator, Object
+from bpy.props import *
 
 from . import interface, utility
 from .config import defaults as default
 
 
-class pipe_nightmare(Operator):
+class OBJECT_OT_pipe_nightmare(Operator):
     bl_idname = 'object.pipe_nightmare'
     bl_label = 'Add Pipes'
     bl_description = 'Generate random pipes.'
     bl_options = {'PRESET', 'REGISTER', 'UNDO'}
 
-
-    amount = IntProperty(
+    amount: IntProperty(
         name = 'Pipes',
         description = 'Number of pipes',
         min = 1,
         soft_max = 250,
-        default = default['amount']
-    )
+        default = default['amount'])
 
-    width = FloatProperty(
+    width: FloatProperty(
         name = 'Region Width',
         description = 'Width of the area that the pipes occupy.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['width']
-    )
+        default = default['width'])
 
-    height = FloatProperty(
-        name = 'Region Height',
-        description = 'Height of the area that the pipes occupy',
-        subtype = 'DISTANCE',
-        min = 0.001,
-        soft_min = 0.1,
-        soft_max = 10.0,
-        default = default['height']
-    )
-
-    depth = FloatProperty(
+    depth: FloatProperty(
         name = 'Region Depth',
         description = 'Depth of the area that the pipes occupy',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['depth']
-    )
+        default = default['depth'])
 
-    uniform = BoolProperty(
+    heigth: FloatProperty(
+        name = 'Region Height',
+        description = 'Height of the area that the pipes occupy',
+        subtype = 'DISTANCE',
+        min = 0.001,
+        soft_min = 0.1,
+        soft_max = 10.0,
+        default = default['height'])
+
+
+    uniform: BoolProperty(
         name = 'Uniform Placement',
         description = 'Place the generated pipes at equal intervals throughout the region depth.',
-        default = default['uniform']
-    )
+        default = default['uniform'])
 
-    length_x_min = FloatProperty(
+    length_x_min: FloatProperty(
         name = 'Minimum',
         description = 'Minimum length of horizantal pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['length_x_min']
-    )
+        default = default['length_x_min'])
 
-    length_x_max = FloatProperty(
+    length_x_max: FloatProperty(
         name = 'Maximum',
         description = 'Maximum length of horizantal pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['length_x_max']
-    )
+        default = default['length_x_max'])
 
-    length_y_min = FloatProperty(
+    length_y_min: FloatProperty(
         name = 'Minimum',
         description = 'Minimum length of vertical pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['length_y_min']
-    )
+        default = default['length_y_min'])
 
-    length_y_max = FloatProperty(
+    length_y_max: FloatProperty(
         name = 'Maximum',
         description = 'Maximum length of vertical pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_min = 0.1,
         soft_max = 10.0,
-        default = default['length_y_max']
-    )
+        default = default['length_y_max'])
 
-    thickness_min = FloatProperty(
+    thickness_min: FloatProperty(
         name = 'Minimum',
         description = 'The minimum thickness of the pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_max = 0.2,
         precision = 3,
-        default = default['thickness_min']
-    )
+        default = default['thickness_min'])
 
-    thickness_max = FloatProperty(
+    thickness_max: FloatProperty(
         name = 'Maximum',
         description = 'The maximum thickness of the pipes.',
         subtype = 'DISTANCE',
         min = 0.001,
         soft_max = 0.2,
         precision = 3,
-        default = default['thickness_max']
-    )
+        default = default['thickness_max'])
 
-    straight = IntProperty(
+    straight: IntProperty(
         name = 'Straight Pipes',
         description = 'The amount of pipes that are straight',
         subtype = 'PERCENTAGE',
         min = 0,
         max = 100,
-        default = default['straight']
-    )
+        default = default['straight'])
 
-    decoration = IntProperty(
-        name = 'Decorations',
-        description = 'Amount of pipes that have additional decorations located along them.',
-        subtype = 'PERCENTAGE',
-        min = 0,
-        max = 100,
-        default = default['decoration']
-    )
+    # decoration: IntProperty(
+    #     name = 'Decorations',
+    #     description = 'Amount of pipes that have additional decorations located along them.',
+    #     subtype = 'PERCENTAGE',
+    #     min = 0,
+    #     max = 100,
+    #     default = default['decoration'])
 
-    split = IntProperty(
-        name = 'Split',
+    split: IntProperty(
+        name = 'Split Pipes',
         description = 'Amount of pipes that should be split up into smaller pipes that occupy the same path.',
         subtype = 'PERCENTAGE',
         min = 0,
         max = 100,
-        default = default['split']
-    )
+        default = default['split'])
 
-    bevel = IntProperty(
+    bevel: IntProperty(
         name = 'Bevel',
         description = 'Amount of pipes that should have rounded corners.',
         subtype = 'PERCENTAGE',
         min = 0,
         max = 100,
-        default = default['bevel']
-    )
+        default = default['bevel'])
 
-    bevel_size = IntProperty(
+    bevel_size: IntProperty(
         name = 'Bevel Size',
         description = 'Percentage size of the beveled corner compared to shortest length of pipe leading to/from the corner.',
         subtype = 'PERCENTAGE',
         min = 0,
         max = 50,
-        default = default['bevel_size']
-    )
+        default = default['bevel_size'])
 
-    surface = IntProperty(
+    surface: IntProperty(
         name = 'Surface',
         description = 'The surface resolution of the pipes.',
         min = 1,
         max = 64,
-        default = default['surface']
-    )
+        default = default['surface'])
 
-    seed = IntProperty(
+    seed: IntProperty(
         name = 'Seed',
         description = 'The seed random basis for generating pipes.',
-        default = default['seed']
-    )
+        default = default['seed'])
 
-    convert = BoolProperty(
-        name = 'Convert to Mesh',
-        description = 'Convert the generated pipes into a single mesh object.',
-        default = default['convert']
-    )
+    # convert: BoolProperty(
+    #     name = 'Convert to Mesh',
+    #     description = 'Convert the generated pipes into a single mesh object.',
+    #     default = default['convert'])
 
-    create_empty = BoolProperty(
-        name = 'Create Empty',
-        description = 'Create an empty as the parent for all the pipes. (Slower but allows for easier control)',
-        default = default['create_empty']
-    )
+    # create_empty: BoolProperty(
+    #     name = 'Create Empty',
+    #     description = 'Create an empty as the parent for all the pipes. (Slower but allows for easier control)',
+    #     default = default['create_empty'])
 
-    tile = BoolProperty(
+    tile: BoolProperty(
         name = 'Tileable',
         description = 'Make the pipes tileable along the Y axis.',
-        default = default['tile']
-    )
+        default = default['tile'])
 
-    depth_locations = []
+    up_axis: EnumProperty(
+        name = 'Up Axis',
+        description = 'Up axis of the pipes generated',
+        items = [
+            ('X', 'X', 'Use the X axis'),
+            ('Y', 'Y', 'Use the Y axis'),
+            ('Z', 'Z', 'Use the Z axis')],
+        default = default['up_axis'])
+
+    depth_locations: list = []
+    location: Vector = Vector()
+
 
     @classmethod
-    def poll(operator, context):
-
+    def poll(cls, context):
         return context.mode == 'OBJECT'
 
 
-    def check(self, context):
-
-        return True
-
-
     def draw(self, context):
-
         interface.operator(self, context)
 
 
     def execute(self, context):
+        context.space_data.overlay.show_relationship_lines = False
+
+        self.location = context.scene.cursor.location
 
         utility.generate(self, context)
 
         return {'FINISHED'}
+
+
+def center(obj):
+    return 0.125 * sum((Vector(bound) for bound in obj.bound_box), Vector())

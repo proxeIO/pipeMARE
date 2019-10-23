@@ -1,61 +1,56 @@
-def operator(operator, context):
+def operator(ot, context):
 
-    layout = operator.layout
+    layout = ot.layout
 
     column = layout.column(align=True)
 
+    column.label(text='Details:')
+    column.prop(ot, 'straight')
+
+    column.prop(ot, 'split')
+    column.prop(ot, 'bevel')
+    column.prop(ot, 'bevel_size')
+
+    column.separator()
     column.label(text='General:')
-    column.prop(operator, 'amount')
-    column.prop(operator, 'width')
-    column.prop(operator, 'height')
+    column.prop(ot, 'amount')
+    column.prop(ot, 'width')
+    column.prop(ot, 'heigth')
 
     row = column.row(align=True)
-    row.prop(operator, 'depth')
-    row.prop(operator, 'uniform', text='', icon='ALIGN')
+    row.prop(ot, 'depth')
+    row.prop(ot, 'uniform', text='', icon='ALIGN_FLUSH')
 
+    column.separator()
     column.label(text='Length X:')
     row = column.row(align=True)
-    row.prop(operator, 'length_x_min', text='Min')
-    row.prop(operator, 'length_x_max', text='Max')
+    row.prop(ot, 'length_x_min', text='Min')
+    row.prop(ot, 'length_x_max', text='Max')
 
     column.label(text='Length Y:')
     row = column.row(align=True)
-    row.prop(operator, 'length_y_min', text='Min')
-    row.prop(operator, 'length_y_max', text='Max')
+    row.prop(ot, 'length_y_min', text='Min')
+    row.prop(ot, 'length_y_max', text='Max')
 
+    column.separator()
     column.label(text='Thickness:')
     row = column.row(align=True)
-    row.prop(operator, 'thickness_min', text='Min')
-    row.prop(operator, 'thickness_max', text='Max')
-
-    column.label(text='Details:')
-    column.prop(operator, 'straight')
-    # column.prop(operator, 'decoration')
-    column.prop(operator, 'split')
-    column.prop(operator, 'bevel')
-    column.prop(operator, 'bevel_size')
+    row.prop(ot, 'thickness_min', text='Min')
+    row.prop(ot, 'thickness_max', text='Max')
 
     column.label(text='Resolution:')
-    column.prop(operator, 'surface')
+    column.prop(ot, 'surface')
 
+    column.separator()
     column.label(text='Misc:')
-    column.prop(operator, 'seed')
+    column.prop(ot, 'seed')
 
-    # column.prop(operator, 'convert')
-
+    column.separator()
     row = column.row()
-    column = row.column()
-    column.active = False if operator.convert else True
-    column.prop(operator, 'create_empty')
+    row.label(text='Up Axis:')
+    row.prop(ot, 'up_axis', text='')
 
-    for area in context.screen.areas:
-        if area.type == 'VIEW_3D':
-            for space in area.spaces:
-                if space.type == 'VIEW_3D':
-                    space_data = space
-
-    column.prop(space_data, 'show_relationship_lines')
-    # column.prop(operator, 'tile')
+    column.separator()
 
 
 def menu_entry(menu, context):
@@ -66,4 +61,4 @@ def menu_entry(menu, context):
 
         layout.separator()
 
-        layout.operator('object.pipe_nightmare', text='Pipes', icon='IPO')
+        layout.operator('object.pipe_nightmare', text='Pipes', icon='PLUGIN')
